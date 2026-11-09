@@ -1,0 +1,13 @@
+@import "tailwindcss";
+/* In the playground we use the source theme so @source scans src/. */
+@import "../src/theme.css";
+
+/* Make Roboto Flex the app-wide default font (body and anything using font-sans). */
+@theme {
+  --font-sans: var(--font-plain);
+}
+
+/* Page background behind the content, including overscroll. */
+body {
+  background-color: var(--color-surface);
+}
