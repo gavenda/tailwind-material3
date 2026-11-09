@@ -22,6 +22,11 @@ import {
   type IconButtonWidth,
 } from '../src'
 import Icon from './Icon.vue'
+import BadgeDemo from './sections/BadgeDemo.vue'
+import DividerDemo from './sections/DividerDemo.vue'
+import ListDemo from './sections/ListDemo.vue'
+import MenuDemo from './sections/MenuDemo.vue'
+import TooltipDemo from './sections/TooltipDemo.vue'
 import { icons } from './icons'
 import { colorMode } from './theme'
 
@@ -587,5 +592,11 @@ const cardStates = ['static', 'interactive', 'dragged', 'disabled'] as const
         </div>
       </Card>
     </section>
+
+    <DividerDemo />
+    <BadgeDemo />
+    <TooltipDemo />
+    <MenuDemo />
+    <ListDemo />
   </main>
 </template>
