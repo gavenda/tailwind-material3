@@ -162,7 +162,7 @@ defineExpose({ open: () => (open.value = true), close: () => (open.value = false
       // Display only while open, so the browser's hidden style for closed popovers still applies.
       'z-50 hidden min-w-28 max-w-70 flex-col font-plain open:flex',
       // One surface with 16dp corners, unless MenuGroups draw their own.
-      groupCount > 0 ? 'gap-0.5' : ['rounded-2xl px-1 py-0.5 shadow-elevation-2', menuSurface[variant]],
+      groupCount > 0 ? 'gap-0.5 bg-transparent p-0' : ['rounded-2xl px-1 py-0.5 shadow-elevation-2', menuSurface[variant]],
     ]"
     @keydown="onKeydown"
   >

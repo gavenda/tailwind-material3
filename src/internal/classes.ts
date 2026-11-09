@@ -21,5 +21,9 @@ export const stateLayer = [
 export const touchTarget =
   'after:absolute after:top-1/2 after:left-1/2 after:h-12 after:w-[max(100%,3rem)] after:-translate-1/2'
 
-/** Resets the UA styles of a [popover] element so we can position and style it ourselves. */
-export const popoverReset = 'm-0 overflow-visible border-0 bg-transparent p-0 text-inherit [inset:auto]'
+/**
+ * Resets the UA styles of a [popover] element so we can position it ourselves.
+ * Background and padding are left out on purpose: each popover sets its own
+ * (two classes for the same property on one element don't have a reliable winner).
+ */
+export const popoverReset = 'm-0 overflow-visible border-0 text-inherit [inset:auto]'

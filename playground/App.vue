@@ -36,6 +36,7 @@ import CarouselDemo from './sections/CarouselDemo.vue'
 import SearchDemo from './sections/SearchDemo.vue'
 import SheetDemo from './sections/SheetDemo.vue'
 import SnackbarDemo from './sections/SnackbarDemo.vue'
+import PickerDemo from './sections/PickerDemo.vue'
 import MenuDemo from './sections/MenuDemo.vue'
 import TooltipDemo from './sections/TooltipDemo.vue'
 import { icons } from './icons'
@@ -620,5 +621,6 @@ const cardStates = ['static', 'interactive', 'dragged', 'disabled'] as const
     <SheetDemo />
     <SearchDemo />
     <CarouselDemo />
+    <PickerDemo />
   </main>
 </template>

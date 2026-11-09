@@ -182,7 +182,7 @@ defineExpose({ show: reveal, hide: conceal })
     :popover="rich && persistent ? 'auto' : 'manual'"
     :role="hasActions ? 'dialog' : 'tooltip'"
     :style="{ transformOrigin: origin }"
-    :class="[popoverReset, 'z-50']"
+    :class="[popoverReset, 'z-50 bg-transparent p-0']"
     @pointerover="onPointerOver"
     @pointerout="onPointerOut"
     @focusout="onFocusOut"

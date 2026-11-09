@@ -1,0 +1,118 @@
+<script setup lang="ts">
+/**
+ * Material 3 docked date picker: a text field with a calendar that drops down below it.
+ * Spec: https://m3.material.io/components/date-pickers/specs (docked)
+ * Tokens: md.comp.date-picker.docked
+ *
+ * - `v-model` is the date (Date | null). Type it in the locale's numeric format, or open
+ *   the calendar with the trailing button; picking a day sets it and closes the calendar.
+ * - `label`, `variant`, `supportingText`, `min`, `max`, `locale` as on TextField/DatePicker.
+ */
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { iconPaths } from '../../internal/icons'
+import { popoverReset } from '../../internal/classes'
+import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { usePopover } from '../../internal/usePopover'
+import IconButton from '../Button/IconButton.vue'
+import TextField, { type TextFieldVariant } from '../TextField/TextField.vue'
+import CalendarPanel from './CalendarPanel.vue'
+import { datePattern, formatNumeric, inRange, parseDate } from './dates'
+
+const props = withDefaults(
+  defineProps<{
+    label?: string
+    variant?: TextFieldVariant
+    supportingText?: string
+    min?: Date | null
+    max?: Date | null
+    locale?: string
+    disabled?: boolean
+    openLabel?: string
+  }>(),
+  {
+    label: 'Date',
+    variant: 'outlined',
+    supportingText: undefined,
+    min: null,
+    max: null,
+    locale: undefined,
+    disabled: false,
+    openLabel: 'Choose date',
+  },
+)
+
+const value = defineModel<Date | null>({ default: null })
+
+const field = useTemplateRef<HTMLElement>('field')
+const popup = useTemplateRef<HTMLElement>('popup')
+const anchor = computed(() => (field.value as unknown as { $el?: HTMLElement } | null)?.$el ?? null)
+
+const text = ref(formatNumeric(value.value, props.locale))
+watch(value, (d) => (text.value = formatNumeric(d, props.locale)))
+
+const pattern = computed(() => datePattern(props.locale))
+const error = computed(() => {
+  if (!text.value.trim()) return false
+  const d = parseDate(text.value, props.locale)
+  return !d || !inRange(d, props.min, props.max)
+})
+
+function commitText() {
+  if (!text.value.trim()) value.value = null
+  else if (!error.value) value.value = parseDate(text.value, props.locale)
+}
+
+const { show, hide, isOpen, justDismissed } = usePopover(anchor, popup, { placement: 'bottom-start', offset: 4 })
+
+async function toggle() {
+  if (justDismissed()) return
+  if (isOpen.value) return hide()
+  show()
+  await nextTick()
+  animate(popup.value, [{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'none' }], {
+    duration: 250,
+    easing: EMPHASIZED_DECELERATE,
+  })
+  popup.value?.querySelector<HTMLElement>('[role="group"] [tabindex="0"]')?.focus()
+}
+
+function pick(d: Date) {
+  value.value = d
+  hide()
+  ;(anchor.value?.querySelector('input') as HTMLInputElement | null)?.focus()
+}
+</script>
+
+<template>
+  <TextField
+    ref="field"
+    v-model="text"
+    :variant="variant"
+    :label="label"
+    :placeholder="pattern"
+    :supporting-text="supportingText ?? pattern"
+    :error="error"
+    :error-text="`Use ${pattern}`"
+    :disabled="disabled"
+    inputmode="numeric"
+    @blur="commitText"
+    @keydown.enter="commitText"
+  >
+    <template #trailing-icon>
+      <IconButton variant="standard" :label="openLabel" :disabled="disabled" @click="toggle">
+        <svg viewBox="0 -960 960 960" fill="currentColor"><path :d="iconPaths.calendarToday" /></svg>
+      </IconButton>
+    </template>
+  </TextField>
+
+  <!-- 360dp wide, 16dp corners, surface-container-high, elevation 3 -->
+  <div
+    ref="popup"
+    popover="auto"
+    role="dialog"
+    :aria-label="label"
+    :class="[popoverReset, 'z-50 w-90 max-w-[calc(100vw-1rem)] rounded-2xl bg-surface-container-high px-0 pt-0 pb-3 shadow-elevation-3']"
+  >
+    <CalendarPanel :selected="value" :min="min" :max="max" :locale="locale" cell="l" @select="pick" />
+  </div>
+</template>
