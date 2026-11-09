@@ -25,6 +25,9 @@ import Icon from './Icon.vue'
 import BadgeDemo from './sections/BadgeDemo.vue'
 import DividerDemo from './sections/DividerDemo.vue'
 import ListDemo from './sections/ListDemo.vue'
+import FabDemo from './sections/FabDemo.vue'
+import SplitButtonDemo from './sections/SplitButtonDemo.vue'
+import TextFieldDemo from './sections/TextFieldDemo.vue'
 import MenuDemo from './sections/MenuDemo.vue'
 import TooltipDemo from './sections/TooltipDemo.vue'
 import { icons } from './icons'
@@ -598,5 +601,8 @@ const cardStates = ['static', 'interactive', 'dragged', 'disabled'] as const
     <TooltipDemo />
     <MenuDemo />
     <ListDemo />
+    <TextFieldDemo />
+    <FabDemo />
+    <SplitButtonDemo />
   </main>
 </template>
