@@ -11,7 +11,8 @@
  *   keyboard users (arrow keys, PageUp/PageDown, Home/End).
  * - The keyboard button switches to typing hours and minutes; `inputMode` starts there.
  */
-import { computed, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
+import { focusRing, stateLayer } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
 import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
 import { useDialog } from '../../internal/useDialog'
@@ -62,6 +63,7 @@ function reset() {
   minutes.value = Number.isFinite(m) ? m : now.getMinutes()
   part.value = 'hour'
   typing.value = props.inputMode
+  syncTyped()
 }
 watch(open, (on) => on && reset(), { immediate: true })
 
@@ -176,16 +178,32 @@ const dialValueText = computed(() =>
   part.value === 'hour' ? `${displayHour.value}${use12.value ? (pm.value ? ' PM' : ' AM') : ''}` : `${minutes.value} minutes`,
 )
 
-// --- Typing
-function onTypedHour(e: Event) {
-  const n = Number((e.target as HTMLInputElement).value)
-  if (!Number.isInteger(n)) return
+// --- Typing: the fields keep what's typed; valid numbers update the time, and the
+// text is tidied (zero-padded) when the field loses focus.
+const hourText = ref('')
+const minuteText = ref('')
+function syncTyped() {
+  hourText.value = pad(displayHour.value)
+  minuteText.value = pad(minutes.value)
+}
+function onTypedHour() {
+  const n = Number(hourText.value)
+  if (!hourText.value || !Number.isInteger(n)) return
   if (use12.value && n >= 1 && n <= 12) hours.value = (n % 12) + (pm.value ? 12 : 0)
   else if (!use12.value && n >= 0 && n <= 23) hours.value = n
 }
-function onTypedMinute(e: Event) {
-  const n = Number((e.target as HTMLInputElement).value)
-  if (Number.isInteger(n) && n >= 0 && n <= 59) minutes.value = n
+function onTypedMinute() {
+  const n = Number(minuteText.value)
+  if (minuteText.value && Number.isInteger(n) && n >= 0 && n <= 59) minutes.value = n
+}
+const selectAll = (e: FocusEvent) => (e.target as HTMLInputElement).select()
+
+// Switching modes swaps the focused control out, so move focus to its replacement.
+async function toggleMode() {
+  typing.value = !typing.value
+  syncTyped()
+  await nextTick()
+  panel.value?.querySelector<HTMLElement>(typing.value ? 'input' : '[role="slider"]')?.focus()
 }
 
 // --- Dialog
@@ -246,7 +264,7 @@ const selectorBox = (active: boolean) => [
             <template v-if="typing">
               <label class="flex flex-col gap-2">
                 <input
-                  :value="pad(displayHour)"
+                  v-model="hourText"
                   inputmode="numeric"
                   maxlength="2"
                   aria-label="Hour"
@@ -255,6 +273,8 @@ const selectorBox = (active: boolean) => [
                     'text-center caret-primary outline-none focus:outline-2 focus:outline-solid focus:outline-primary',
                   ]"
                   @input="onTypedHour"
+                  @focus="selectAll"
+                  @blur="syncTyped"
                   @keydown.enter="confirm"
                 />
                 <span class="text-body-small text-on-surface-variant">Hour</span>
@@ -262,7 +282,7 @@ const selectorBox = (active: boolean) => [
               <span class="mb-7 w-6 text-center font-brand text-display-large text-on-surface">:</span>
               <label class="flex flex-col gap-2">
                 <input
-                  :value="pad(minutes)"
+                  v-model="minuteText"
                   inputmode="numeric"
                   maxlength="2"
                   aria-label="Minute"
@@ -271,17 +291,19 @@ const selectorBox = (active: boolean) => [
                     'text-center caret-primary outline-none focus:bg-primary-container focus:text-on-primary-container focus:outline-2 focus:outline-solid focus:outline-primary',
                   ]"
                   @input="onTypedMinute"
+                  @focus="selectAll"
+                  @blur="syncTyped"
                   @keydown.enter="confirm"
                 />
                 <span class="text-body-small text-on-surface-variant">Minute</span>
               </label>
             </template>
             <template v-else>
-              <button type="button" :aria-pressed="part === 'hour'" :class="[selectorBox(part === 'hour'), 'cursor-pointer']" @click="part = 'hour'">
+              <button type="button" aria-label="Hour" :aria-pressed="part === 'hour'" :class="[selectorBox(part === 'hour'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'hour'">
                 {{ use12 ? displayHour : pad(displayHour) }}
               </button>
               <span class="w-6 text-center font-brand text-display-large text-on-surface">:</span>
-              <button type="button" :aria-pressed="part === 'minute'" :class="[selectorBox(part === 'minute'), 'cursor-pointer']" @click="part = 'minute'">
+              <button type="button" aria-label="Minute" :aria-pressed="part === 'minute'" :class="[selectorBox(part === 'minute'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'minute'">
                 {{ pad(minutes) }}
               </button>
             </template>
@@ -290,7 +312,7 @@ const selectorBox = (active: boolean) => [
           <!-- Period selector: 52×80dp, outlined, tertiary-container when selected -->
           <div
             v-if="use12"
-            role="radiogroup"
+            role="group"
             aria-label="AM or PM"
             class="flex h-20 w-13 flex-col overflow-hidden rounded-[8px] border border-outline text-title-medium"
           >
@@ -298,12 +320,13 @@ const selectorBox = (active: boolean) => [
               v-for="isPm in [false, true]"
               :key="String(isPm)"
               type="button"
-              role="radio"
-              :aria-checked="pm === isPm"
+              :aria-pressed="pm === isPm"
               :class="[
-                'flex flex-1 cursor-pointer items-center justify-center',
+                'relative flex flex-1 cursor-pointer items-center justify-center',
+                'focus:outline-none focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-solid focus-visible:outline-secondary',
+                stateLayer,
                 isPm && 'border-t border-outline',
-                pm === isPm ? 'bg-tertiary-container text-on-tertiary-container' : 'text-on-surface-variant hover:bg-on-surface/8',
+                pm === isPm ? 'bg-tertiary-container text-on-tertiary-container' : 'text-on-surface-variant',
               ]"
               @click="setPeriod(isPm)"
             >
@@ -351,7 +374,7 @@ const selectorBox = (active: boolean) => [
         </div>
 
         <div class="mt-6 flex items-center gap-2">
-          <IconButton variant="standard" :label="typing ? 'Switch to clock' : 'Switch to text input'" class="-ms-3" @click="typing = !typing">
+          <IconButton variant="standard" :label="typing ? 'Switch to clock' : 'Switch to text input'" class="-ms-3" @click="toggleMode">
             <svg viewBox="0 -960 960 960" fill="currentColor"><path :d="typing ? iconPaths.schedule : iconPaths.keyboard" /></svg>
           </IconButton>
           <Button variant="text" class="ms-auto" @click="cancel">{{ cancelLabel }}</Button>

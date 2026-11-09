@@ -142,13 +142,13 @@ const contentEnd = computed(() => (hasTrailing.value ? 'pe-13' : 'pe-4'))
 </script>
 
 <template>
-  <div v-bind="rootAttrs" :class="['inline-flex w-70 flex-col font-plain', disabled && 'pointer-events-none']">
+    <!-- 280dp default width at zero specificity, so a width class passed in always wins. -->
+  <div v-bind="rootAttrs" :class="['inline-flex flex-col font-plain [:where(&)]:w-70', disabled && 'pointer-events-none']">
     <div
       :class="[
         'group relative flex cursor-text items-start',
         multiline ? 'min-h-14' : 'h-14',
-        outlined ? 'rounded-[4px]' : 'rounded-t-[4px] bg-surface-container-highest',
-        !outlined && disabled && 'bg-on-surface/4',
+        outlined ? 'rounded-[4px]' : ['rounded-t-[4px]', disabled ? 'bg-on-surface/4' : 'bg-surface-container-highest'],
       ]"
       @mousedown="focusInput"
     >
@@ -212,11 +212,11 @@ const contentEnd = computed(() => (hasTrailing.value ? 'pe-13' : 'pe-4'))
 
       <div
         :class="[
-          'relative flex min-w-0 flex-1 items-baseline gap-0.5 text-body-large text-on-surface',
+          'relative flex min-w-0 flex-1 items-baseline gap-0.5 text-body-large',
+          disabled ? 'text-on-surface/38' : 'text-on-surface',
           contentStart,
           contentEnd,
           outlined ? 'py-4' : label ? 'pt-6 pb-2' : 'py-4',
-          disabled && 'text-on-surface/38',
           !multiline && 'h-full',
         ]"
       >

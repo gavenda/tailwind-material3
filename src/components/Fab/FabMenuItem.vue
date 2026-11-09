@@ -21,6 +21,7 @@ const color = computed(() => colors[menu?.color ?? 'primary'])
   <button
     type="button"
     role="menuitem"
+    tabindex="-1"
     :class="[
       'relative inline-flex h-14 shrink-0 cursor-pointer items-center gap-2 rounded-full px-6 font-plain text-title-medium whitespace-nowrap shadow-elevation-3 select-none',
       'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',

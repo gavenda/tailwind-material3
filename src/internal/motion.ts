@@ -1,6 +1,5 @@
 /** Web Animations helpers that respect prefers-reduced-motion. */
 
-export const EMPHASIZED = 'cubic-bezier(0.2, 0, 0, 1)'
 export const EMPHASIZED_DECELERATE = 'cubic-bezier(0.05, 0.7, 0.1, 1)'
 export const EMPHASIZED_ACCELERATE = 'cubic-bezier(0.3, 0, 0.8, 0.15)'
 

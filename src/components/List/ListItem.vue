@@ -16,6 +16,8 @@ import { computed, inject, useSlots, type Component } from 'vue'
 import { focusRingInset } from '../../internal/classes'
 import { listKey } from './context'
 
+defineOptions({ inheritAttrs: false })
+
 const props = withDefaults(
   defineProps<{
     as?: string | Component
@@ -77,6 +79,7 @@ const muted = computed(() => (props.selected ? 'text-on-secondary-container' : '
   <div role="listitem" class="contents">
   <component
     :is="as"
+    v-bind="$attrs"
     :type="isNativeButton ? 'button' : undefined"
     :disabled="isNativeButton ? disabled : undefined"
     :aria-disabled="disabled || undefined"

@@ -28,6 +28,8 @@ const props = withDefaults(
     /** Accessible name of the trailing (menu) button. */
     menuLabel?: string
     menuVariant?: MenuVariant
+    /** Accessible name of the whole split button group. */
+    label?: string
     disabled?: boolean
   }>(),
   {
@@ -35,6 +37,7 @@ const props = withDefaults(
     size: 's',
     menuLabel: 'More options',
     menuVariant: 'standard',
+    label: undefined,
     disabled: false,
   },
 )
@@ -82,7 +85,7 @@ function toggle() {
 </script>
 
 <template>
-  <div ref="group" role="group" class="inline-flex gap-0.5">
+  <div ref="group" role="group" :aria-label="label" class="inline-flex gap-0.5">
     <Button
       :variant="variant"
       :size="size"
@@ -97,9 +100,8 @@ function toggle() {
       :variant="variant"
       :size="size"
       :disabled="disabled"
+      v-bind="menu?.anchorProps"
       :aria-label="menuLabel"
-      aria-haspopup="menu"
-      :aria-expanded="open"
       :style="trailingCorners"
       :class="spec.trailing"
       @click="toggle"

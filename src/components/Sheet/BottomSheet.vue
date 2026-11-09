@@ -70,10 +70,13 @@ let lastY = 0
 let lastT = 0
 let velocity = 0
 let dragging = false
+/** Set once the pointer moves a few px, so the handle's click isn't treated as a tap. */
+let moved = false
 
 function onPointerDown(e: PointerEvent) {
   if (e.button !== 0) return
   dragging = true
+  moved = false
   startY = lastY = e.clientY
   lastT = e.timeStamp
   velocity = 0
@@ -82,6 +85,7 @@ function onPointerDown(e: PointerEvent) {
 function onPointerMove(e: PointerEvent) {
   if (!dragging) return
   drag.value = Math.max(0, e.clientY - startY)
+  if (Math.abs(e.clientY - startY) > 3) moved = true
   const dt = e.timeStamp - lastT
   if (dt > 0) velocity = (e.clientY - lastY) / dt
   lastY = e.clientY
@@ -139,7 +143,7 @@ function onPointerUp() {
           :aria-label="handleLabel"
           class="group flex h-12 w-full shrink-0 cursor-grab touch-none items-center justify-center focus:outline-none active:cursor-grabbing"
           @pointerdown="onPointerDown"
-          @click="drag === 0 && cancel()"
+          @click="!moved && cancel()"
         >
           <span
             class="h-1 w-8 rounded-full bg-on-surface-variant/40 group-focus-visible:outline-3 group-focus-visible:outline-offset-2 group-focus-visible:outline-secondary group-focus-visible:outline-solid"

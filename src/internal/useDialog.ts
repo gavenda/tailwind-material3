@@ -20,8 +20,13 @@ export function useDialog(dialog: Readonly<Ref<HTMLDialogElement | null>>, open:
 
   async function show() {
     const el = dialog.value
-    if (!(el instanceof HTMLDialogElement) || el.open) return
+    if (!(el instanceof HTMLDialogElement)) return
+    // Reopened while a close was animating: cancel that close.
     ++generation
+    if (el.open) {
+      el.getAnimations({ subtree: true }).forEach((a) => a.cancel())
+      return
+    }
     if (options.modal?.() ?? true) el.showModal()
     else el.show()
     await nextTick()
@@ -55,7 +60,10 @@ export function useDialog(dialog: Readonly<Ref<HTMLDialogElement | null>>, open:
     cancel()
   }
 
-  /** Bind to the dialog's @close (closed some other way). */
+  /**
+   * Bind to the dialog's @close (closed some other way). After our own hide() the
+   * model is already false, so onClosed isn't called twice.
+   */
   function onClose() {
     if (open.value) {
       open.value = false

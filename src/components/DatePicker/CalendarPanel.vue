@@ -64,7 +64,10 @@ async function toggleYears() {
 }
 
 function pickYear(y: number) {
-  month.value = new Date(y, month.value.getMonth(), 1)
+  let m = new Date(y, month.value.getMonth(), 1)
+  if (props.min && m < startOfMonth(props.min)) m = startOfMonth(props.min)
+  if (props.max && m > startOfMonth(props.max)) m = startOfMonth(props.max)
+  month.value = m
   years.value = false
 }
 

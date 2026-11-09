@@ -12,7 +12,7 @@
  *   2dp apart). Without groups, the items share one surface.
  * - Arrow keys, Home and End move focus between items. Focus returns to the anchor on close.
  */
-import { computed, nextTick, provide, reactive, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, provide, reactive, ref, useId, useTemplateRef, watch } from 'vue'
 import { popoverReset } from '../../internal/classes'
 import { animate, cssVar } from '../../internal/motion'
 import { usePopover, type Placement } from '../../internal/usePopover'
@@ -101,17 +101,34 @@ async function openMenu() {
   )
 }
 
+// Bumped on every open/close, so a close that finishes animating after a reopen gives up.
+let generation = 0
+// Tab moves focus on by itself; don't pull it back to the anchor.
+let restoreFocus = true
+
 async function closeMenu() {
   if (!isOpen.value) return
-  const wasInside = menu.value?.contains(document.activeElement)
+  const mine = ++generation
+  const wasInside = restoreFocus && menu.value?.contains(document.activeElement)
+  restoreFocus = true
   await animate(menu.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: 'linear', fill: 'forwards' })
+  if (mine !== generation) return
   menu.value?.getAnimations().forEach((a) => a.cancel())
   hide()
   if (wasInside) anchorEl.value?.focus()
   emit('closed')
 }
 
-watch(open, (on) => (on ? openMenu() : closeMenu()))
+watch(open, (on) => {
+  if (on) {
+    ++generation
+    menu.value?.getAnimations().forEach((a) => a.cancel())
+    openMenu()
+  } else {
+    closeMenu()
+  }
+})
+onMounted(() => open.value && openMenu())
 
 function toggle() {
   if (justDismissed()) return
@@ -120,7 +137,10 @@ function toggle() {
 
 // Escape is handled by the browser (popover="auto"), which then calls onDismiss.
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Tab') open.value = false
+  if (e.key === 'Tab') {
+    restoreFocus = false
+    open.value = false
+  }
   else rove(e)
 }
 
@@ -133,6 +153,7 @@ function onAnchorKeydown(e: KeyboardEvent) {
   open.value = true
 }
 
+/** Attributes for the anchor element; also exposed for components that pass `anchor`. */
 const anchorProps = computed(() => ({
   'aria-haspopup': 'menu' as const,
   'aria-expanded': open.value,
@@ -142,7 +163,7 @@ const anchorProps = computed(() => ({
 
 const origin = computed(() => (side.value === 'top' ? 'bottom' : 'top'))
 
-defineExpose({ open: () => (open.value = true), close: () => (open.value = false), toggle })
+defineExpose({ open: () => (open.value = true), close: () => (open.value = false), toggle, anchorProps })
 </script>
 
 <template>

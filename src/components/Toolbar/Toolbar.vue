@@ -38,7 +38,7 @@ provide(toolbarKey, reactive({ color: computed(() => props.color) }))
 
 const bar = useTemplateRef<HTMLElement>('bar')
 const isVertical = computed(() => props.variant === 'floating' && props.vertical)
-const { onKeydown } = useRovingFocus(bar, 'button, a[href]', isVertical.value ? 'vertical' : 'horizontal')
+const { onKeydown } = useRovingFocus(bar, 'button, a[href]', () => (isVertical.value ? 'vertical' : 'horizontal'))
 
 const surface = computed(() =>
   props.color === 'vibrant' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container text-on-surface-variant',

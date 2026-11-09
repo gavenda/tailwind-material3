@@ -45,6 +45,7 @@ const open = defineModel<boolean>('open', { default: false })
 
 const slots = useSlots()
 const id = useId()
+const subheadId = useId()
 
 const wrap = useTemplateRef<HTMLElement>('wrap')
 const tip = useTemplateRef<HTMLElement>('tip')
@@ -72,7 +73,12 @@ const origin = computed(
 
 async function reveal() {
   clearTimers()
-  if (props.disabled || isOpen.value) return
+  if (props.disabled) return
+  ++generation
+  if (isOpen.value) {
+    tip.value?.getAnimations().forEach((a) => a.cancel())
+    return
+  }
   show()
   open.value = true
   await nextTick()
@@ -86,10 +92,16 @@ async function reveal() {
   )
 }
 
+// Bumped on every show/hide, so a hide that finishes after a reshow gives up.
+let generation = 0
+
 async function conceal() {
   clearTimers()
   if (!isOpen.value) return
+  const mine = ++generation
   await animate(tip.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: 'linear', fill: 'forwards' })
+  if (mine !== generation) return
+  tip.value?.getAnimations().forEach((a) => a.cancel())
   hide()
   open.value = false
 }
@@ -181,6 +193,7 @@ defineExpose({ show: reveal, hide: conceal })
     ref="tip"
     :popover="rich && persistent ? 'auto' : 'manual'"
     :role="hasActions ? 'dialog' : 'tooltip'"
+    :aria-labelledby="hasActions && $slots.subhead ? subheadId : undefined"
     :style="{ transformOrigin: origin }"
     :class="[popoverReset, 'z-50 bg-transparent p-0']"
     @pointerover="onPointerOver"
@@ -202,7 +215,7 @@ defineExpose({ show: reveal, hide: conceal })
       class="flex max-w-80 flex-col rounded-[12px] bg-surface-container px-4 pt-3 shadow-elevation-2"
       :class="hasActions ? 'pb-2' : 'pb-3'"
     >
-      <div v-if="$slots.subhead" class="mb-1 font-plain text-title-small text-on-surface-variant">
+      <div v-if="$slots.subhead" :id="subheadId" class="mb-1 font-plain text-title-small text-on-surface-variant">
         <slot name="subhead" />
       </div>
       <div class="font-plain text-body-medium text-on-surface-variant">

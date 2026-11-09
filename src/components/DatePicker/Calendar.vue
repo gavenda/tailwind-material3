@@ -53,11 +53,20 @@ const monthLabel = computed(() =>
 )
 
 // The day that holds the roving tab stop.
-const focusDay = ref<Date>(props.selected ?? props.rangeStart ?? (sameMonth(today, props.month) ? today : props.month))
+function clampDay(d: Date) {
+  if (props.min && !inRange(d, props.min, null)) return startOfDay(props.min)
+  if (props.max && !inRange(d, null, props.max)) return startOfDay(props.max)
+  return d
+}
+const focusDay = ref<Date>(
+  clampDay(props.selected ?? props.rangeStart ?? (sameMonth(today, props.month) ? today : props.month)),
+)
 watch(
   () => props.month,
   (m) => {
-    if (!sameMonth(focusDay.value, m)) focusDay.value = new Date(m.getFullYear(), m.getMonth(), Math.min(focusDay.value.getDate(), 28))
+    if (!sameMonth(focusDay.value, m)) {
+      focusDay.value = clampDay(new Date(m.getFullYear(), m.getMonth(), Math.min(focusDay.value.getDate(), 28)))
+    }
   },
 )
 

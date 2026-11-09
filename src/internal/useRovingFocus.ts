@@ -3,14 +3,14 @@
  * Items are found by selector at key time, so they can come and go freely.
  * Disabled items (disabled or aria-disabled="true") are skipped.
  */
-import type { Ref } from 'vue'
+import { toValue, type MaybeRefOrGetter, type Ref } from 'vue'
 
 export type Orientation = 'horizontal' | 'vertical' | 'both'
 
 export function useRovingFocus(
   container: Readonly<Ref<HTMLElement | null>>,
   selector: string,
-  orientation: Orientation = 'vertical',
+  orientation: MaybeRefOrGetter<Orientation> = 'vertical',
 ) {
   function items() {
     const root = container.value
@@ -33,8 +33,9 @@ export function useRovingFocus(
     const list = items()
     const current = list.indexOf(document.activeElement as HTMLElement)
     const rtl = container.value ? getComputedStyle(container.value).direction === 'rtl' : false
-    const vertical = orientation !== 'horizontal'
-    const horizontal = orientation !== 'vertical'
+    const axis = toValue(orientation)
+    const vertical = axis !== 'horizontal'
+    const horizontal = axis !== 'vertical'
     const next = rtl ? 'ArrowLeft' : 'ArrowRight'
     const prev = rtl ? 'ArrowRight' : 'ArrowLeft'
 

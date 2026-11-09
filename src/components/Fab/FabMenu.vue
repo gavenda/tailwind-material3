@@ -11,7 +11,7 @@
  * - Put the FAB icon in the `icon` slot; `label` names the FAB for screen readers.
  * - Place it yourself (e.g. `class="fixed end-4 bottom-4"`); items open upwards, end-aligned.
  */
-import { computed, nextTick, onBeforeUnmount, provide, reactive, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, reactive, useId, useTemplateRef, watch } from 'vue'
 import { iconPaths } from '../../internal/icons'
 import { animate } from '../../internal/motion'
 import { useRovingFocus } from '../../internal/useRovingFocus'
@@ -79,7 +79,7 @@ function onDocumentPointerDown(e: PointerEvent) {
   if (!root.value?.contains(e.target as Node)) open.value = false
 }
 
-watch(open, async (on) => {
+async function onOpenChange(on: boolean) {
   if (on) {
     document.addEventListener('pointerdown', onDocumentPointerDown)
     await nextTick()
@@ -100,11 +100,17 @@ watch(open, async (on) => {
     document.removeEventListener('pointerdown', onDocumentPointerDown)
     if (root.value?.contains(document.activeElement)) fab.value?.focus()
   }
-})
+}
+watch(open, onOpenChange)
+onMounted(() => open.value && onOpenChange(true))
 onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPointerDown))
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape' && open.value) {
+    e.preventDefault()
+    open.value = false
+  } else if (e.key === 'Tab' && open.value && list.value?.contains(document.activeElement)) {
+    // Leave the item stack: close it and land back on the close button.
     e.preventDefault()
     open.value = false
   } else {

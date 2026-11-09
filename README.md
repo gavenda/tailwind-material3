@@ -46,6 +46,31 @@ import { Button } from 'tailwind-material3'
 
 `Button` variants: `filled` (default), `outlined`, `text`, `elevated`, `tonal`.
 
+## Components
+
+All components follow the Material 3 Expressive specs and tokens.
+
+| Area | Components |
+| --- | --- |
+| Actions | `Button`, `IconButton`, `ButtonGroup`, `SplitButton`, `Fab` (incl. extended), `FabMenu` / `FabMenuItem` |
+| Communication | `Badge`, `LoadingIndicator`, `LinearProgressIndicator`, `CircularProgressIndicator`, `Snackbar`, `Tooltip` |
+| Containment | `Card`, `Carousel`, `Dialog`, `Divider`, `List` / `ListItem`, `BottomSheet`, `SideSheet` |
+| Navigation | `AppBar`, `NavigationBar`, `NavigationRail`, `NavigationItem`, `Tabs` / `Tab`, `Toolbar`, `Search` |
+| Selection | `Checkbox`, `Chip`, `DatePicker`, `DateField` (docked date picker), `Menu` / `MenuItem` / `MenuGroup`, `Radio`, `Slider`, `Switch`, `TimePicker` |
+| Text input | `TextField` |
+
+Deprecated components are left out in favour of their Expressive replacements:
+segmented buttons → connected `ButtonGroup`, navigation drawer → expanded
+`NavigationRail`, bottom app bar → docked `Toolbar`, medium/large app bars →
+`AppBar` `medium-flexible` / `large-flexible`.
+
+Each component's source starts with a comment describing its props, slots and
+behaviour; the playground has a demo of every one.
+
+Menus, tooltips and the docked date picker use the Popover API; dialogs, sheets,
+search and the modal pickers use `<dialog>`. Both are supported in all current
+browsers.
+
 ## Development
 
 ```bash

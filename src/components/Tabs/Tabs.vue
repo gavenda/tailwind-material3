@@ -99,8 +99,10 @@ function onKeydown(e: KeyboardEvent) {
       ref="list"
       role="tablist"
       :aria-label="label"
+      :tabindex="indicator ? undefined : 0"
       :class="['relative flex', scrollable && 'overflow-x-auto [scrollbar-width:none] *:flex-none']"
       @keydown="onKeydown"
+      @focus.self="list?.querySelector<HTMLElement>('[role=tab]:not(:disabled)')?.focus()"
     >
       <slot />
       <span

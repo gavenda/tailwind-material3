@@ -69,7 +69,6 @@ const { onCancel, onClose } = useDialog(dialog, active, {
     )
   },
   leave: () => animate(panel.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }),
-  onClosed: () => bar.value?.querySelector('input')?.blur(),
 })
 
 function activate() {
@@ -111,7 +110,7 @@ function onKeydown(e: KeyboardEvent) {
       class="min-w-0 flex-1 cursor-text truncate bg-transparent text-body-large text-on-surface outline-none placeholder:text-on-surface-variant"
       @keydown.enter.prevent="activate"
       @keydown.space.prevent="activate"
-      @keydown="(e: KeyboardEvent) => e.key.length === 1 && activate()"
+      @keydown="(e: KeyboardEvent) => e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && activate()"
     />
     <span v-if="$slots.trailing" class="relative flex shrink-0 items-center text-on-surface-variant" @click.stop>
       <slot name="trailing" />

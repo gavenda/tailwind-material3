@@ -8,7 +8,7 @@
  *   the calendar with the trailing button; picking a day sets it and closes the calendar.
  * - `label`, `variant`, `supportingText`, `min`, `max`, `locale` as on TextField/DatePicker.
  */
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
 import { iconPaths } from '../../internal/icons'
 import { popoverReset } from '../../internal/classes'
 import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
@@ -43,6 +43,7 @@ const props = withDefaults(
 
 const value = defineModel<Date | null>({ default: null })
 
+const popupId = useId()
 const field = useTemplateRef<HTMLElement>('field')
 const popup = useTemplateRef<HTMLElement>('popup')
 const anchor = computed(() => (field.value as unknown as { $el?: HTMLElement } | null)?.$el ?? null)
@@ -99,7 +100,15 @@ function pick(d: Date) {
     @keydown.enter="commitText"
   >
     <template #trailing-icon>
-      <IconButton variant="standard" :label="openLabel" :disabled="disabled" @click="toggle">
+      <IconButton
+        variant="standard"
+        :label="openLabel"
+        :disabled="disabled"
+        aria-haspopup="dialog"
+        :aria-expanded="isOpen"
+        :aria-controls="popupId"
+        @click="toggle"
+      >
         <svg viewBox="0 -960 960 960" fill="currentColor"><path :d="iconPaths.calendarToday" /></svg>
       </IconButton>
     </template>
@@ -107,6 +116,7 @@ function pick(d: Date) {
 
   <!-- 360dp wide, 16dp corners, surface-container-high, elevation 3 -->
   <div
+    :id="popupId"
     ref="popup"
     popover="auto"
     role="dialog"
