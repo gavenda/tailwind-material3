@@ -8,9 +8,10 @@
  * Put the icon (e.g. an <svg>) in the default slot; it receives `{ selected }`
  * so toggles can swap icons. Works inside a ButtonGroup like Button does.
  */
-import { computed, useTemplateRef } from 'vue'
+import { computed, inject, useTemplateRef } from 'vue'
 import type { ButtonValue } from '../ButtonGroup/context'
 import type { ButtonShape, ButtonSize } from './types'
+import { toolbarButtonColors, toolbarKey } from '../Toolbar/context'
 import { buttonBaseClasses, touchTargetClasses, useButton } from './useButton'
 
 export type IconButtonVariant = 'filled' | 'tonal' | 'outlined' | 'standard'
@@ -120,6 +121,9 @@ const colors: Record<IconButtonVariant, Record<ColorState, string>> = {
   },
 }
 
+// Inside a Toolbar, standard icon buttons take the toolbar's colors.
+const toolbar = inject(toolbarKey, null)
+
 const spec = computed(() => sizes[size.value])
 
 const classes = computed(() => {
@@ -138,7 +142,7 @@ const classes = computed(() => {
     small && touchTargetClasses,
     // Connected XS/S groups: 48dp minimum width
     connected.value && small && 'min-w-12',
-    colors[props.variant][state],
+    toolbar && props.variant === 'standard' ? toolbarButtonColors[toolbar.color][state] : colors[props.variant][state],
     !noContainer && 'disabled:bg-on-surface/10',
   ]
 })

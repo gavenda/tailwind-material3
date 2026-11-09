@@ -28,6 +28,10 @@ import ListDemo from './sections/ListDemo.vue'
 import FabDemo from './sections/FabDemo.vue'
 import SplitButtonDemo from './sections/SplitButtonDemo.vue'
 import TextFieldDemo from './sections/TextFieldDemo.vue'
+import AppBarDemo from './sections/AppBarDemo.vue'
+import NavigationDemo from './sections/NavigationDemo.vue'
+import TabsDemo from './sections/TabsDemo.vue'
+import ToolbarDemo from './sections/ToolbarDemo.vue'
 import MenuDemo from './sections/MenuDemo.vue'
 import TooltipDemo from './sections/TooltipDemo.vue'
 import { icons } from './icons'
@@ -604,5 +608,9 @@ const cardStates = ['static', 'interactive', 'dragged', 'disabled'] as const
     <TextFieldDemo />
     <FabDemo />
     <SplitButtonDemo />
+    <NavigationDemo />
+    <TabsDemo />
+    <AppBarDemo />
+    <ToolbarDemo />
   </main>
 </template>
