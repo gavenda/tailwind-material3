@@ -22,7 +22,10 @@ export function animate(
   frames: Keyframe[],
   options: KeyframeAnimationOptions,
 ): Promise<void> {
-  if (!el || prefersReducedMotion() || typeof el.animate !== 'function') return Promise.resolve()
+  // Hidden pages throttle animations; skip them so closes never wait on a paused timeline.
+  if (!el || prefersReducedMotion() || document.visibilityState === 'hidden' || typeof el.animate !== 'function') {
+    return Promise.resolve()
+  }
   return el.animate(frames, options).finished.then(
     () => undefined,
     () => undefined,

@@ -32,6 +32,10 @@ import AppBarDemo from './sections/AppBarDemo.vue'
 import NavigationDemo from './sections/NavigationDemo.vue'
 import TabsDemo from './sections/TabsDemo.vue'
 import ToolbarDemo from './sections/ToolbarDemo.vue'
+import CarouselDemo from './sections/CarouselDemo.vue'
+import SearchDemo from './sections/SearchDemo.vue'
+import SheetDemo from './sections/SheetDemo.vue'
+import SnackbarDemo from './sections/SnackbarDemo.vue'
 import MenuDemo from './sections/MenuDemo.vue'
 import TooltipDemo from './sections/TooltipDemo.vue'
 import { icons } from './icons'
@@ -612,5 +616,9 @@ const cardStates = ['static', 'interactive', 'dragged', 'disabled'] as const
     <TabsDemo />
     <AppBarDemo />
     <ToolbarDemo />
+    <SnackbarDemo />
+    <SheetDemo />
+    <SearchDemo />
+    <CarouselDemo />
   </main>
 </template>
