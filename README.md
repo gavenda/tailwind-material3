@@ -5,7 +5,16 @@ Material 3 components for Vue 3, styled with Tailwind CSS v4.
 ## Usage
 
 ```bash
-bun add tailwind-material3 vue tailwindcss
+bun add github:gavenda/tailwind-material3 vue tailwindcss
+```
+
+The package ships its source (`.vue` and `.ts`), not a build, so it installs
+straight from GitHub. Your app compiles it: use `@vitejs/plugin-vue`, and keep
+Vite from pre-bundling it:
+
+```ts
+// vite.config.ts
+optimizeDeps: { exclude: ['tailwind-material3'] }
 ```
 
 In your app's main CSS file:
@@ -91,6 +100,6 @@ browsers.
 ```bash
 bun install
 bun run dev        # playground at http://localhost:5173
-bun run build      # library build to dist/
+bun run build      # library build to dist/ (a check only; the package ships src/)
 bun run typecheck
 ```
