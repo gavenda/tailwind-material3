@@ -24,11 +24,11 @@ if (!nav?.toggle) console.warn('[NavigationRailMenuButton] Put it in a Navigatio
 const expanded = computed(() => !!nav?.expanded)
 
 /**
- * The swap happens when the spring is halfway (about 75ms in), so each icon is only seen
- * the right way round. Both icons switch together; menu_open is drawn pre-rotated by half
- * a turn so it ends upright.
+ * The swap happens when the spring is halfway: the default spatial spring (stiffness 380,
+ * damping 0.8) passes 0.5 at 80ms. Each icon is then only seen the right way round. Both
+ * icons switch together; menu_open is drawn pre-rotated by half a turn so it ends upright.
  */
-const swap = 'transition-opacity duration-0 delay-75 motion-reduce:delay-0'
+const swap = 'transition-opacity duration-0 delay-80 motion-reduce:delay-0'
 </script>
 
 <template>

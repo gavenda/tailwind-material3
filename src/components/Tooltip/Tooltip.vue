@@ -1,3 +1,8 @@
+<script lang="ts">
+// Only one tooltip shows at a time: the open one's close function.
+let closeOpen: (() => unknown) | null = null
+</script>
+
 <script setup lang="ts">
 /**
  * Material 3 tooltip: plain or rich.
@@ -7,8 +12,8 @@
  * Wrap the element it describes:
  *   <Tooltip text="Save"><IconButton label="Save">…</IconButton></Tooltip>
  *
- * - Shows on hover (after `delay`), keyboard focus, or long press; hides on leave,
- *   blur, Escape, or 1.5s after a touch.
+ * - Shows on hover (after `delay`), keyboard focus, or long press. Hides 1.5s after the pointer
+ *   leaves (or after a touch), or on blur or Escape. Opening one closes any other open tooltip.
  * - Plain: one short `text` (or the `content` slot).
  * - Rich: `subhead` and `content` slots (or `text`), plus `actions`. Hovering the tooltip keeps it
  *   open. With `persistent`, it opens on click and stays until dismissed.
@@ -79,6 +84,8 @@ async function reveal() {
     tip.value?.getAnimations().forEach((a) => a.cancel())
     return
   }
+  if (closeOpen && closeOpen !== conceal) closeOpen()
+  closeOpen = conceal
   show()
   open.value = true
   await nextTick()
@@ -93,6 +100,7 @@ let generation = 0
 async function conceal() {
   clearTimers()
   if (!isOpen.value) return
+  if (closeOpen === conceal) closeOpen = null
   const mine = ++generation
   await fadeOut(tip.value)
   if (mine !== generation) return
@@ -124,8 +132,9 @@ function onPointerOut(e: PointerEvent) {
   if (!hoverOpens.value || e.pointerType === 'touch') return
   const to = e.relatedTarget as Node | null
   if (to && (wrap.value?.contains(to) || tip.value?.contains(to))) return
-  // Give the pointer time to move onto a rich tooltip.
-  scheduleHide(rich.value ? 300 : 0)
+  // Spec: tooltips disappear 1.5s after the pointer leaves the target region. That also
+  // gives the pointer time to move onto a rich tooltip.
+  scheduleHide(1500)
 }
 function onPointerDown(e: PointerEvent) {
   if (e.pointerType !== 'touch' || !hoverOpens.value) return
@@ -160,7 +169,10 @@ onMounted(() => {
   anchor.value?.setAttribute('aria-describedby', ids ? `${ids} ${id}` : id)
   if (open.value) reveal()
 })
-onBeforeUnmount(clearTimers)
+onBeforeUnmount(() => {
+  clearTimers()
+  if (closeOpen === conceal) closeOpen = null
+})
 watch(open, (on) => (on ? reveal() : conceal()))
 
 defineExpose({ show: reveal, hide: conceal })

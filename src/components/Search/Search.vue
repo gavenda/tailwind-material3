@@ -66,20 +66,22 @@ onMounted(() => {
 const docked = computed(() => props.view === 'docked' || (props.view === 'auto' && !compact.value))
 
 /**
- * Docked view: placed over the bar, at least 360dp wide, and at most 640dp tall or down to
- * 16dp above the window's bottom edge. The page can still scroll (or resize) under a modal
- * dialog, so while it's open the view follows the bar.
+ * Docked view (contained style): placed over the bar, 360–720dp wide, and 240dp up to 2/3 of
+ * the window's height tall, but never past 16dp above the window's bottom edge. The page can
+ * still scroll (or resize) under a modal dialog, so while it's open the view follows the bar.
  */
-const rect = ref({ top: 0, left: 0, width: 360, maxHeight: 640 })
+const rect = ref({ top: 0, left: 0, width: 360, minHeight: 240, maxHeight: 640 })
 function place() {
   if (!docked.value || !bar.value) return
   const r = bar.value.getBoundingClientRect()
+  // Never shorter than the bar itself, even when the bar is near the bottom.
+  const maxHeight = Math.max(r.height, Math.min((window.innerHeight * 2) / 3, window.innerHeight - r.top - 16))
   rect.value = {
     top: r.top,
     left: r.left,
-    width: Math.max(360, r.width),
-    // Never shorter than the bar itself, even when the bar is near the bottom.
-    maxHeight: Math.max(r.height, Math.min(640, window.innerHeight - r.top - 16)),
+    width: Math.min(720, Math.max(360, r.width)),
+    minHeight: Math.min(240, maxHeight),
+    maxHeight,
   }
 }
 let frame = 0
@@ -231,7 +233,7 @@ function onKeydown(e: KeyboardEvent) {
       :class="['flex flex-col font-plain', docked ? 'absolute gap-0.5' : 'relative size-full']"
       :style="
         docked
-          ? { top: `${rect.top}px`, left: `${rect.left}px`, width: `${rect.width}px`, maxHeight: `${rect.maxHeight}px` }
+          ? { top: `${rect.top}px`, left: `${rect.left}px`, width: `${rect.width}px`, minHeight: `${rect.minHeight}px`, maxHeight: `${rect.maxHeight}px` }
           : undefined
       "
     >
