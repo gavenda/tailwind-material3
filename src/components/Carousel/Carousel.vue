@@ -11,7 +11,8 @@
  * - hero: one large item and a small one peeking at the end.
  * - uncontained: fixed-width items that run off the edge.
  * - full-screen: one item at a time, edge to edge, scrolling vertically.
- * Scrolling snaps to items. Height comes from `height` (or the parent for full-screen).
+ * Scrolling snaps to items; with a mouse the carousel can also be dragged.
+ * Height comes from `height` (or the parent for full-screen).
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { focusRing } from '../../internal/classes'
@@ -176,6 +177,105 @@ const snapPoints = computed(() => {
   const step = keylines.value.large + GAP
   return Array.from({ length: Math.floor(maxScroll.value / step) + 1 }, (_, i) => i * step)
 })
+
+/** Snap offsets along the scroll axis, for settling after a mouse drag. */
+function snapOffsets(): number[] {
+  const el = scroller.value
+  if (!el) return []
+  if (keylined.value) return snapPoints.value
+  const vertical = props.layout === 'full-screen'
+  const max = vertical ? el.scrollHeight - el.clientHeight : el.scrollWidth - el.clientWidth
+  const items = [...(track.value?.children ?? [])] as HTMLElement[]
+  const offsets = items.map((c) => Math.min(max, vertical ? c.offsetTop : c.offsetLeft))
+  return [...new Set(offsets)].sort((a, b) => a - b)
+}
+
+// Mouse drag. Touch and trackpads already scroll natively.
+const DRAG_THRESHOLD = 4
+let drag: { id: number; start: number; origin: number; moved: boolean } | undefined
+let restoreSnap: (() => void) | undefined
+
+function axis(e: PointerEvent) {
+  return props.layout === 'full-screen' ? e.clientY : e.clientX
+}
+
+function onPointerDown(e: PointerEvent) {
+  const el = scroller.value
+  if (!el || e.pointerType !== 'mouse' || e.button !== 0) return
+  restoreSnap?.()
+  drag = {
+    id: e.pointerId,
+    start: axis(e),
+    origin: props.layout === 'full-screen' ? el.scrollTop : el.scrollLeft,
+    moved: false,
+  }
+}
+
+function onPointerMove(e: PointerEvent) {
+  const el = scroller.value
+  if (!el || !drag || e.pointerId !== drag.id) return
+  const delta = axis(e) - drag.start
+  if (!drag.moved) {
+    if (Math.abs(delta) < DRAG_THRESHOLD) return
+    drag.moved = true
+    el.setPointerCapture(e.pointerId)
+    // Snapping fights manual scrolling, so turn it off until the drag settles.
+    el.style.scrollSnapType = 'none'
+    el.style.cursor = 'grabbing'
+  }
+  e.preventDefault()
+  if (props.layout === 'full-screen') el.scrollTop = drag.origin - delta
+  else el.scrollLeft = drag.origin - delta
+}
+
+function onPointerUp(e: PointerEvent) {
+  const el = scroller.value
+  if (!el || !drag || e.pointerId !== drag.id) return
+  const { moved, origin } = drag
+  drag = undefined
+  if (!moved) return
+  el.style.cursor = ''
+  if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId)
+
+  // Settle on the nearest item; a deliberate drag always moves at least one item.
+  const vertical = props.layout === 'full-screen'
+  const pos = vertical ? el.scrollTop : el.scrollLeft
+  const offsets = snapOffsets()
+  let target = pos
+  if (offsets.length) {
+    const nearest = (v: number) => offsets.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a))
+    target = nearest(pos)
+    const from = nearest(origin)
+    if (target === from && Math.abs(pos - origin) > 32) {
+      const i = offsets.indexOf(from) + Math.sign(pos - origin)
+      target = offsets[Math.max(0, Math.min(offsets.length - 1, i))]
+    }
+  }
+
+  const done = () => {
+    el.removeEventListener('scrollend', done)
+    clearTimeout(timer)
+    el.style.scrollSnapType = ''
+    restoreSnap = undefined
+  }
+  const timer = setTimeout(done, 600)
+  el.addEventListener('scrollend', done)
+  restoreSnap = done
+  el.scrollTo({ [vertical ? 'top' : 'left']: target, behavior: 'smooth' })
+
+  // The click that ends a drag shouldn't activate whatever is under the pointer.
+  // It fires straight after pointerup, so the flag only needs to last one task.
+  suppressClick = true
+  setTimeout(() => (suppressClick = false), 0)
+}
+
+let suppressClick = false
+function onClickCapture(e: MouseEvent) {
+  if (!suppressClick) return
+  suppressClick = false
+  e.stopPropagation()
+  e.preventDefault()
+}
 </script>
 
 <template>
@@ -194,6 +294,12 @@ const snapPoints = computed(() => {
     ]"
     :style="layout === 'full-screen' ? undefined : { height }"
     @scroll="onScroll"
+    @pointerdown="onPointerDown"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
+    @pointercancel="onPointerUp"
+    @dragstart.prevent
+    @click.capture="onClickCapture"
   >
     <div
       ref="track"
