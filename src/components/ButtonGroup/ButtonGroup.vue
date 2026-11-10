@@ -9,7 +9,7 @@
  * - connected: 2dp apart with tighter inner corners; selection changes only that button.
  */
 import { onBeforeUnmount, provide, shallowRef } from 'vue'
-import { prefersReducedMotion } from '../../internal/motion'
+import { prefersReducedMotion, spatial } from '../../internal/motion'
 import type { ButtonShape, ButtonSize } from '../Button/types'
 import {
   buttonGroupKey,
@@ -119,9 +119,6 @@ provide(buttonGroupKey, {
 
 /** pressed.item.width.multiplier */
 const WIDTH_MULTIPLIER = 0.15
-/** Matches --duration-spring-fast-spatial in theme.css */
-const SPRING_MS = 360
-
 let natural: Map<HTMLElement, number> | null = null
 let resetTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -157,11 +154,13 @@ function press(el: HTMLElement) {
 
 function release() {
   if (!natural) return
+  const [first] = natural.keys()
   for (const [b, width] of natural) b.style.width = `${width}px`
+  // Clear the fixed widths once the spring back has finished.
   resetTimer = setTimeout(() => {
     for (const b of natural?.keys() ?? []) b.style.width = ''
     natural = null
-  }, SPRING_MS)
+  }, spatial(first, 'fast').duration)
 }
 
 function onPointerDown(e: PointerEvent) {

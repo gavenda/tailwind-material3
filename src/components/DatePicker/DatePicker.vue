@@ -16,7 +16,7 @@
 import { computed, ref, useId, useTemplateRef, watch } from 'vue'
 import { scrimClasses } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate, EMPHASIZED_DECELERATE, scrimIn, scrimOut } from '../../internal/motion'
+import { animate, effects, fadeOut, scrimIn, scrimOut, spatial } from '../../internal/motion'
 import { fill, useLabels } from '../../internal/labels'
 import { useDialog } from '../../internal/useDialog'
 import Button from '../Button/Button.vue'
@@ -152,17 +152,11 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
   onClosed: () => emit('closed'),
   enter: () =>
     Promise.all([
-      animate(panel.value, [{ opacity: 0, transform: 'scale(0.9)' }, { opacity: 1, transform: 'none' }], {
-        duration: 300,
-        easing: EMPHASIZED_DECELERATE,
-      }),
+      animate(panel.value, [{ transform: 'scale(0.9)' }, { transform: 'none' }], spatial(panel.value)),
+      animate(panel.value, [{ opacity: 0 }, { opacity: 1 }], effects(panel.value)),
       scrimIn(scrim.value),
     ]),
-  leave: () =>
-    Promise.all([
-      animate(panel.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }),
-      scrimOut(scrim.value),
-    ]),
+  leave: () => Promise.all([fadeOut(panel.value), scrimOut(scrim.value)]),
 })
 
 function confirm() {

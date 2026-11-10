@@ -16,7 +16,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useSlots, useTemplateRef, watch } from 'vue'
 import { popoverReset } from '../../internal/classes'
-import { animate } from '../../internal/motion'
+import { animate, effects, fadeOut, spatial } from '../../internal/motion'
 import { usePopover, type Placement } from '../../internal/usePopover'
 
 const props = withDefaults(
@@ -82,14 +82,9 @@ async function reveal() {
   show()
   open.value = true
   await nextTick()
-  animate(
-    tip.value,
-    [
-      { opacity: 0, transform: 'scale(0.8)' },
-      { opacity: 1, transform: 'none' },
-    ],
-    { duration: 150, easing: 'cubic-bezier(0.31, 0.94, 0.34, 1)' },
-  )
+  // Grows with the fast spatial spring while fading in with fast effects.
+  animate(tip.value, [{ transform: 'scale(0.8)' }, { transform: 'none' }], spatial(tip.value, 'fast'))
+  animate(tip.value, [{ opacity: 0 }, { opacity: 1 }], effects(tip.value, 'fast'))
 }
 
 // Bumped on every show/hide, so a hide that finishes after a reshow gives up.
@@ -99,7 +94,7 @@ async function conceal() {
   clearTimers()
   if (!isOpen.value) return
   const mine = ++generation
-  await animate(tip.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: 'linear', fill: 'forwards' })
+  await fadeOut(tip.value)
   if (mine !== generation) return
   tip.value?.getAnimations().forEach((a) => a.cancel())
   hide()

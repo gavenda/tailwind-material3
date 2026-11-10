@@ -444,7 +444,7 @@ function indicatorStyle(i: number) {
         :aria-orientation="orientation"
         :aria-disabled="disabled || undefined"
         :class="[
-          'absolute rounded-full transition-[width,height] duration-150',
+          'absolute rounded-full transition-[width,height] duration-(--duration-spring-fast-spatial) ease-spring-fast-spatial motion-reduce:transition-none',
           focusRing,
           vertical
             ? ['left-1/2 -translate-x-1/2 translate-y-1/2', pressed === i ? 'h-0.5' : 'h-1 focus-visible:h-0.5']

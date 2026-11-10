@@ -12,7 +12,7 @@
  */
 import { ref, useTemplateRef } from 'vue'
 import { scrimClasses } from '../../internal/classes'
-import { animate, EMPHASIZED_ACCELERATE, EMPHASIZED_DECELERATE, scrimIn, scrimOut } from '../../internal/motion'
+import { animate, noOvershoot, scrimIn, scrimOut, spatial } from '../../internal/motion'
 import { useDialog } from '../../internal/useDialog'
 
 const props = withDefaults(
@@ -45,22 +45,20 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
   persistent: () => props.persistent,
   onCancel: () => emit('cancel'),
   onClosed: () => emit('closed'),
+  // The sheet is pinned to the bottom edge, so its spring stops at the target
+  // instead of overshooting (which would lift it off the edge).
   enter: () =>
     Promise.all([
-      animate(sheet.value, [{ transform: 'translateY(100%)' }, { transform: 'none' }], {
-        duration: 500,
-        easing: EMPHASIZED_DECELERATE,
-      }),
+      animate(sheet.value, [{ transform: 'translateY(100%)' }, { transform: 'none' }], noOvershoot(spatial(sheet.value))),
       scrimIn(scrim.value),
     ]),
   leave: () =>
     Promise.all([
-      animate(
-        sheet.value,
-        [{ transform: `translateY(${drag.value}px)` }, { transform: 'translateY(100%)' }],
-        { duration: 250, easing: EMPHASIZED_ACCELERATE, fill: 'forwards' },
-      ),
-      scrimOut(scrim.value, 250),
+      animate(sheet.value, [{ transform: `translateY(${drag.value}px)` }, { transform: 'translateY(100%)' }], {
+        ...noOvershoot(spatial(sheet.value)),
+        fill: 'forwards',
+      }),
+      scrimOut(scrim.value),
     ]).then(() => (drag.value = 0)),
 })
 
@@ -103,10 +101,7 @@ function onPointerUp() {
   } else {
     const from = drag.value
     drag.value = 0
-    animate(sheet.value, [{ transform: `translateY(${from}px)` }, { transform: 'none' }], {
-      duration: 300,
-      easing: EMPHASIZED_DECELERATE,
-    })
+    animate(sheet.value, [{ transform: `translateY(${from}px)` }, { transform: 'none' }], noOvershoot(spatial(sheet.value)))
   }
 }
 </script>

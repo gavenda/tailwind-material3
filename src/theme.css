@@ -130,7 +130,13 @@
     0 2px 3px 0 rgb(0 0 0 / 0.3), 0 6px 10px 4px rgb(0 0 0 / 0.15);
   --shadow-elevation-5:
     0 4px 4px 0 rgb(0 0 0 / 0.3), 0 8px 12px 6px rgb(0 0 0 / 0.15);
+}
 
+/*
+ * Motion tokens. `static` keeps every one in the output even when no class uses
+ * it, because components also read them from JavaScript (internal/motion.ts).
+ */
+@theme static {
   /*
    * md.sys.motion.spring.fast.spatial, Expressive scheme
    * (stiffness 800, damping 0.6), sampled into a linear() easing.
@@ -165,6 +171,10 @@
   --duration-effects-fast: 150ms;
   --duration-effects-default: 200ms;
   --duration-effects-slow: 300ms;
+
+  /* Bare transition-* utilities (state layers, elevation) default to fast effects. */
+  --default-transition-duration: var(--duration-effects-fast);
+  --default-transition-timing-function: var(--ease-effects-fast);
 }
 
 /*
@@ -175,7 +185,7 @@
   transition:
     border-radius var(--duration-spring-fast-spatial) var(--ease-spring-fast-spatial),
     width var(--duration-spring-fast-spatial) var(--ease-spring-fast-spatial),
-    box-shadow 200ms ease;
+    box-shadow var(--duration-effects-default) var(--ease-effects-default);
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;

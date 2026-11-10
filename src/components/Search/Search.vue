@@ -13,7 +13,7 @@
  */
 import { computed, nextTick, ref, useId, useTemplateRef } from 'vue'
 import { iconPaths } from '../../internal/icons'
-import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { animate, effects, fadeOut, noOvershoot, spatial } from '../../internal/motion'
 import { useDialog } from '../../internal/useDialog'
 import IconButton from '../Button/IconButton.vue'
 
@@ -54,21 +54,20 @@ const { onCancel, onClose } = useDialog(dialog, open, {
     }
     await nextTick()
     input.value?.focus()
-    return animate(
-      panel.value,
-      docked.value
-        ? [
-            { opacity: 0, clipPath: 'inset(0 0 calc(100% - 56px) 0 round 28px)' },
-            { opacity: 1, clipPath: 'inset(0 0 0 0 round 0)' },
-          ]
-        : [
-            { opacity: 0, transform: 'translateY(-16px)' },
-            { opacity: 1, transform: 'none' },
-          ],
-      { duration: 400, easing: EMPHASIZED_DECELERATE },
-    )
+    // The view fills its box (or the screen), so the spring stops at the target
+    // rather than overshooting past an edge.
+    return Promise.all([
+      animate(
+        panel.value,
+        docked.value
+          ? [{ clipPath: 'inset(0 0 calc(100% - 56px) 0 round 28px)' }, { clipPath: 'inset(0 0 0 0 round 0)' }]
+          : [{ transform: 'translateY(-16px)' }, { transform: 'none' }],
+        noOvershoot(spatial(panel.value)),
+      ),
+      animate(panel.value, [{ opacity: 0 }, { opacity: 1 }], effects(panel.value)),
+    ]).then(() => undefined)
   },
-  leave: () => animate(panel.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }),
+  leave: () => fadeOut(panel.value),
 })
 
 function activate() {

@@ -12,11 +12,13 @@
  * - Clicking the scrim or pressing Escape emits `cancel` and closes it, unless `persistent`.
  * - Emits `closed` once the close animation finishes.
  *
- * Motion follows material-web's dialog: it slides down 50px while the container grows
- * from 35% height (500ms, emphasized), and the contents fade in after it.
+ * Motion follows material-web's dialog choreography on M3 Expressive springs: it slides
+ * down 50px while the container grows from 35% height (default spatial spring), and the
+ * contents fade in after it (default effects).
  */
 import { computed, nextTick, onMounted, ref, useId, useSlots, useTemplateRef, watch } from 'vue'
 import IconButton from '../Button/IconButton.vue'
+import { effects, noOvershoot, prefersReducedMotion, spatial } from '../../internal/motion'
 
 const props = withDefaults(
   defineProps<{
@@ -67,17 +69,12 @@ onMounted(() => {
 })
 
 // --- Motion
-const EMPHASIZED = 'cubic-bezier(0.3, 0, 0, 1)'
-const EMPHASIZED_ACCELERATE = 'cubic-bezier(0.3, 0, 0.8, 0.15)'
-const EMPHASIZED_DECELERATE = 'cubic-bezier(0.05, 0.7, 0.1, 1)'
-
 type Step = [Element | null | undefined, Keyframe[], KeyframeAnimationOptions]
 let running: Animation[] = []
 
 function play(steps: Step[]) {
   running.forEach((a) => a.cancel())
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (reduced) return Promise.resolve()
+  if (prefersReducedMotion()) return Promise.resolve()
   running = steps.flatMap(([el, frames, options]) => (el ? [el.animate(frames, options)] : []))
   return Promise.all(running.map((a) => a.finished)).then(
     () => undefined,
@@ -85,59 +82,51 @@ function play(steps: Step[]) {
   )
 }
 
-const fade = (el: Element | null | undefined, hold: number, duration: number): Step => [
+const fade = (el: Element | null | undefined, delay: number): Step => [
   el,
-  [{ opacity: 0 }, { opacity: 0, offset: hold }, { opacity: 1 }],
-  { duration, easing: 'linear', fill: 'backwards' },
+  [{ opacity: 0 }, { opacity: 1 }],
+  { ...effects(el, 'default'), delay, fill: 'backwards' },
 ]
-const fadeOut = (el: Element | null | undefined): Step => [
+const fadeOut = (el: Element | null | undefined, delay = 0): Step => [
   el,
   [{ opacity: 1 }, { opacity: 0 }],
-  { duration: 100, easing: 'linear', fill: 'forwards' },
+  { ...effects(el, 'fast'), delay, fill: 'forwards' },
 ]
 
 function openSteps(): Step[] {
+  const move = spatial(panel.value, 'default')
   if (props.fullscreen) {
+    // Full height: an overshoot would lift it off the bottom edge.
     return [
-      [
-        panel.value,
-        [
-          { opacity: 0, transform: 'translateY(48px)' },
-          { opacity: 1, transform: 'none' },
-        ],
-        { duration: 400, easing: EMPHASIZED_DECELERATE },
-      ],
+      [panel.value, [{ transform: 'translateY(48px)' }, { transform: 'none' }], noOvershoot(move)],
+      [panel.value, [{ opacity: 0 }, { opacity: 1 }], effects(panel.value, 'default')],
     ]
   }
   return [
-    [panel.value, [{ transform: 'translateY(-50px)' }, { transform: 'none' }], { duration: 500, easing: EMPHASIZED }],
-    [scrim.value, [{ opacity: 0 }, { opacity: 0.32 }], { duration: 500, easing: 'linear' }],
-    [surface.value, [{ opacity: 0 }, { opacity: 1 }], { duration: 50, easing: 'linear' }],
-    [surface.value, [{ height: '35%' }, { height: '100%' }], { duration: 500, easing: EMPHASIZED }],
-    fade(top.value, 0.2, 250),
-    fade(scroller.value, 0.2, 250),
-    fade(actions.value, 0.5, 300),
+    [panel.value, [{ transform: 'translateY(-50px)' }, { transform: 'none' }], move],
+    [scrim.value, [{ opacity: 0 }, { opacity: 0.32 }], effects(scrim.value, 'slow')],
+    [surface.value, [{ opacity: 0 }, { opacity: 1 }], effects(surface.value, 'fast')],
+    // The surface can't grow past its box, so the height stops at 100%.
+    [surface.value, [{ height: '35%' }, { height: '100%' }], noOvershoot(move)],
+    fade(top.value, 50),
+    fade(scroller.value, 50),
+    fade(actions.value, 150),
   ]
 }
 
 function closeSteps(): Step[] {
+  const move = noOvershoot(spatial(panel.value, 'fast'))
   if (props.fullscreen) {
     return [
-      [
-        panel.value,
-        [
-          { opacity: 1, transform: 'none' },
-          { opacity: 0, transform: 'translateY(48px)' },
-        ],
-        { duration: 200, easing: EMPHASIZED_ACCELERATE, fill: 'forwards' },
-      ],
+      [panel.value, [{ transform: 'none' }, { transform: 'translateY(48px)' }], { ...move, fill: 'forwards' }],
+      fadeOut(panel.value),
     ]
   }
   return [
-    [panel.value, [{ transform: 'none' }, { transform: 'translateY(-50px)' }], { duration: 150, easing: EMPHASIZED_ACCELERATE, fill: 'forwards' }],
-    [scrim.value, [{ opacity: 0.32 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }],
-    [surface.value, [{ height: '100%' }, { height: '35%' }], { duration: 150, easing: EMPHASIZED_ACCELERATE, fill: 'forwards' }],
-    [surface.value, [{ opacity: 1 }, { opacity: 0 }], { delay: 100, duration: 50, easing: 'linear', fill: 'forwards' }],
+    [panel.value, [{ transform: 'none' }, { transform: 'translateY(-50px)' }], { ...move, fill: 'forwards' }],
+    [scrim.value, [{ opacity: 0.32 }, { opacity: 0 }], { ...effects(scrim.value, 'fast'), fill: 'forwards' }],
+    [surface.value, [{ height: '100%' }, { height: '35%' }], { ...move, fill: 'forwards' }],
+    fadeOut(surface.value, 50),
     fadeOut(top.value),
     fadeOut(scroller.value),
     fadeOut(actions.value),

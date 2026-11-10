@@ -14,7 +14,7 @@
  */
 import { computed, nextTick, onMounted, provide, reactive, ref, useId, useTemplateRef, watch } from 'vue'
 import { popoverReset } from '../../internal/classes'
-import { animate, cssVar } from '../../internal/motion'
+import { animate, effects, fadeOut, spatial } from '../../internal/motion'
 import { usePopover, type Placement } from '../../internal/usePopover'
 import { useRovingFocus } from '../../internal/useRovingFocus'
 import { menuKey, menuSurface, type MenuVariant } from './context'
@@ -91,14 +91,8 @@ async function openMenu() {
   // Expressive menus unfold from the anchor side with the fast spatial spring.
   const el = menu.value
   if (!el) return
-  animate(
-    el,
-    [
-      { opacity: 0, transform: 'scaleY(0.6)' },
-      { opacity: 1, transform: 'none' },
-    ],
-    { duration: 360, easing: cssVar(el, '--ease-spring-fast-spatial', 'ease-out') },
-  )
+  animate(el, [{ transform: 'scaleY(0.6)' }, { transform: 'none' }], spatial(el, 'fast'))
+  animate(el, [{ opacity: 0 }, { opacity: 1 }], effects(el, 'fast'))
 }
 
 // Bumped on every open/close, so a close that finishes animating after a reopen gives up.
@@ -111,7 +105,7 @@ async function closeMenu() {
   const mine = ++generation
   const wasInside = restoreFocus && menu.value?.contains(document.activeElement)
   restoreFocus = true
-  await animate(menu.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 100, easing: 'linear', fill: 'forwards' })
+  await fadeOut(menu.value)
   if (mine !== generation) return
   menu.value?.getAnimations().forEach((a) => a.cancel())
   hide()

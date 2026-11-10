@@ -14,7 +14,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, provide, reactive, useId, useTemplateRef, watch } from 'vue'
 import { focusRing, stateLayer } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate } from '../../internal/motion'
+import { animate, effects, spatial } from '../../internal/motion'
 import { useRovingFocus } from '../../internal/useRovingFocus'
 import type { FabSize } from './Fab.vue'
 import { fabMenuKey, type FabMenuColor } from './context'
@@ -86,16 +86,16 @@ async function onOpenChange(on: boolean) {
     await nextTick()
     // Items rise in one after another, nearest the FAB first.
     const items = [...(list.value?.children ?? [])].reverse()
-    items.forEach((el, i) =>
-      animate(
-        el,
-        [
-          { opacity: 0, transform: 'translateY(8px) scale(0.9)' },
-          { opacity: 1, transform: 'none' },
-        ],
-        { duration: 300, delay: i * 30, easing: 'cubic-bezier(0.31, 0.94, 0.34, 1)', fill: 'backwards' },
-      ),
-    )
+    // Movement uses the fast spatial spring; the fade uses fast effects.
+    items.forEach((el, i) => {
+      const delay = i * 30
+      animate(el, [{ transform: 'translateY(8px) scale(0.9)' }, { transform: 'none' }], {
+        ...spatial(el, 'fast'),
+        delay,
+        fill: 'backwards',
+      })
+      animate(el, [{ opacity: 0 }, { opacity: 1 }], { ...effects(el, 'fast'), delay, fill: 'backwards' })
+    })
     focusFirst()
   } else {
     document.removeEventListener('pointerdown', onDocumentPointerDown)

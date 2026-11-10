@@ -12,7 +12,7 @@
 import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
 import { popoverReset } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { animate, effects, spatial } from '../../internal/motion'
 import { fill, useLabels } from '../../internal/labels'
 import { usePopover } from '../../internal/usePopover'
 import IconButton from '../Button/IconButton.vue'
@@ -75,10 +75,8 @@ async function toggle() {
   if (isOpen.value) return hide()
   show()
   await nextTick()
-  animate(popup.value, [{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'none' }], {
-    duration: 250,
-    easing: EMPHASIZED_DECELERATE,
-  })
+  animate(popup.value, [{ transform: 'translateY(-8px)' }, { transform: 'none' }], spatial(popup.value, 'fast'))
+  animate(popup.value, [{ opacity: 0 }, { opacity: 1 }], effects(popup.value, 'fast'))
   popup.value?.querySelector<HTMLElement>('[role="group"] [tabindex="0"]')?.focus()
 }
 

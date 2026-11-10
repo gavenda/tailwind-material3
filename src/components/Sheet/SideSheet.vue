@@ -15,7 +15,7 @@
 import { computed, useId, useTemplateRef } from 'vue'
 import { scrimClasses } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate, EMPHASIZED_ACCELERATE, EMPHASIZED_DECELERATE, scrimIn, scrimOut } from '../../internal/motion'
+import { animate, noOvershoot, scrimIn, scrimOut, spatial } from '../../internal/motion'
 import { useDialog } from '../../internal/useDialog'
 import IconButton from '../Button/IconButton.vue'
 
@@ -53,19 +53,19 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
   persistent: () => props.persistent,
   onCancel: () => emit('cancel'),
   onClosed: () => emit('closed'),
+  // Pinned to a side edge, so the spring stops at the target instead of overshooting.
   enter: () =>
     Promise.all([
-      animate(sheet.value, [{ transform: offscreen() }, { transform: 'none' }], { duration: 450, easing: EMPHASIZED_DECELERATE }),
+      animate(sheet.value, [{ transform: offscreen() }, { transform: 'none' }], noOvershoot(spatial(sheet.value))),
       scrimIn(scrim.value),
     ]),
   leave: () =>
     Promise.all([
       animate(sheet.value, [{ transform: 'none' }, { transform: offscreen() }], {
-        duration: 250,
-        easing: EMPHASIZED_ACCELERATE,
+        ...noOvershoot(spatial(sheet.value)),
         fill: 'forwards',
       }),
-      scrimOut(scrim.value, 250),
+      scrimOut(scrim.value),
     ]),
 })
 
