@@ -1,6 +1,6 @@
 {
   "name": "tailwind-material3",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha01",
   "description": "Material 3 Vue components styled with Tailwind CSS",
   "type": "module",
   "license": "MIT",
