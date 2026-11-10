@@ -5,6 +5,7 @@
  * Clicking it closes the menu. Listen with @click.
  */
 import { computed, inject } from 'vue'
+import { focusRing, stateLayer } from '../../internal/classes'
 import { fabMenuKey } from './context'
 
 const menu = inject(fabMenuKey, null)
@@ -24,9 +25,8 @@ const color = computed(() => colors[menu?.color ?? 'primary'])
     tabindex="-1"
     :class="[
       'relative inline-flex h-14 shrink-0 cursor-pointer items-center gap-2 rounded-full px-6 font-plain text-title-medium whitespace-nowrap shadow-elevation-3 select-none',
-      'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
-      'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-      'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+      focusRing,
+      stateLayer,
       color,
     ]"
     @click="menu?.close()"

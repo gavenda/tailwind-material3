@@ -10,6 +10,7 @@
  * Vertical sliders fill their parent's height.
  */
 import { computed, onBeforeUnmount, onMounted, ref, useSlots, useTemplateRef } from 'vue'
+import { focusRing } from '../../internal/classes'
 
 export type SliderSize = 'xs' | 's' | 'm' | 'l' | 'xl'
 export type SliderOrientation = 'horizontal' | 'vertical'
@@ -444,7 +445,7 @@ function indicatorStyle(i: number) {
         :aria-disabled="disabled || undefined"
         :class="[
           'absolute rounded-full transition-[width,height] duration-150',
-          'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
+          focusRing,
           vertical
             ? ['left-1/2 -translate-x-1/2 translate-y-1/2', pressed === i ? 'h-0.5' : 'h-1 focus-visible:h-0.5']
             : [

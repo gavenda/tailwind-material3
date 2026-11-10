@@ -10,6 +10,7 @@
  */
 import { computed, inject, type Component } from 'vue'
 import Badge from '../Badge/Badge.vue'
+import { useBadge, type BadgeProp } from '../Badge/useBadge'
 import { navKey, type NavValue } from './context'
 
 const props = withDefaults(
@@ -17,7 +18,7 @@ const props = withDefaults(
     value?: NavValue
     label: string
     active?: boolean
-    badge?: boolean | number | string
+    badge?: BadgeProp
     as?: string | Component
     disabled?: boolean
   }>(),
@@ -43,7 +44,7 @@ function onClick(e: MouseEvent) {
   emit('click', e)
 }
 
-const badgeValue = computed(() => (typeof props.badge === 'boolean' ? undefined : props.badge))
+const { hasBadge, badgeValue } = useBadge(() => props.badge)
 </script>
 
 <template>
@@ -85,7 +86,7 @@ const badgeValue = computed(() => (typeof props.badge === 'boolean' ? undefined 
           isActive ? 'scale-x-100 opacity-100' : 'scale-x-50 opacity-0',
         ]"
       />
-      <Badge v-if="badge !== undefined && badge !== false" :value="badgeValue" class="relative">
+      <Badge v-if="hasBadge" :value="badgeValue" class="relative">
         <span class="inline-flex size-6 *:size-full" aria-hidden="true">
           <slot v-if="isActive && $slots['active-icon']" name="active-icon" />
           <slot v-else name="icon" />

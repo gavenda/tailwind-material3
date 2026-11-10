@@ -24,11 +24,11 @@ const search = ref('Material')
         :error="!email.includes('.')"
         error-text="Enter a full address"
       >
-        <template #leading-icon><Icon :svg="icons.mail" /></template>
+        <template #icon><Icon :svg="icons.mail" /></template>
       </TextField>
       <TextField v-model="price" :variant="variant" label="Price" prefix="$" suffix="USD" inputmode="decimal" />
       <TextField v-model="search" :variant="variant" label="Search">
-        <template #leading-icon><Icon :svg="icons.search" /></template>
+        <template #icon><Icon :svg="icons.search" /></template>
         <template #trailing-icon>
           <IconButton v-if="search" variant="standard" label="Clear" @click="search = ''"><Icon :svg="icons.close" /></IconButton>
         </template>

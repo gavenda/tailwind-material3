@@ -12,6 +12,20 @@ const time = ref<string | null>('09:30')
 const timeOpen = ref(false)
 const time24 = ref<string | null>('18:45')
 const time24Open = ref(false)
+const timeEsOpen = ref(false)
+// Translation example: any subset of the English text can be replaced.
+const spanish = {
+  selectTime: 'Selecciona la hora',
+  enterTime: 'Introduce la hora',
+  hour: 'Hora',
+  minute: 'Minuto',
+  minutes: '{minutes} minutos',
+  period: 'a. m. o p. m.',
+  switchToClock: 'Cambiar al reloj',
+  switchToInput: 'Cambiar a texto',
+  cancel: 'Cancelar',
+  confirm: 'Aceptar',
+}
 const fmt = (d: Date | null) => (d ? d.toLocaleDateString() : '—')
 const minDate = new Date(new Date().getFullYear(), 0, 1)
 </script>
@@ -38,8 +52,10 @@ const minDate = new Date(new Date().getFullYear(), 0, 1)
       <span class="text-body-medium">{{ time ?? '—' }}</span>
       <Button variant="tonal" @click="time24Open = true">24-hour</Button>
       <span class="text-body-medium">{{ time24 ?? '—' }}</span>
+      <Button variant="tonal" @click="timeEsOpen = true">Spanish</Button>
     </div>
     <TimePicker v-model="time" v-model:open="timeOpen" :hour12="true" />
     <TimePicker v-model="time24" v-model:open="time24Open" :hour12="false" />
+    <TimePicker v-model="time" v-model:open="timeEsOpen" locale="es" :hour12="true" :labels="spanish" />
   </section>
 </template>

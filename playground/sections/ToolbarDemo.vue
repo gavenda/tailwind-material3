@@ -34,7 +34,7 @@ const italic = ref(false)
           <IconButton variant="standard" label="Underline"><Icon :svg="icons.formatUnderlined" /></IconButton>
           <IconButton variant="standard" label="Text color"><Icon :svg="icons.formatColorText" /></IconButton>
           <template #fab>
-            <Fab color="secondary-container" aria-label="Add"><template #icon><Icon :svg="icons.add" /></template></Fab>
+            <Fab color="secondary-container" label="Add"><template #icon><Icon :svg="icons.add" /></template></Fab>
           </template>
         </Toolbar>
         <Toolbar variant="floating" color="vibrant" vertical label="Vertical">
@@ -42,7 +42,7 @@ const italic = ref(false)
           <IconButton variant="standard" label="Link"><Icon :svg="icons.link" /></IconButton>
           <IconButton variant="standard" label="Image"><Icon :svg="icons.image" /></IconButton>
           <template #fab>
-            <Fab color="tertiary-container" aria-label="Edit"><template #icon><Icon :svg="icons.edit" /></template></Fab>
+            <Fab color="tertiary-container" label="Edit"><template #icon><Icon :svg="icons.edit" /></template></Fab>
           </template>
         </Toolbar>
       </div>

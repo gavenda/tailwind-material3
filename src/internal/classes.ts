@@ -8,6 +8,10 @@ export const focusRing =
 export const focusRingInset =
   'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:-outline-offset-3 focus-visible:outline-secondary'
 
+/** Same focus ring with no offset (for small items packed closely, e.g. calendar days). */
+export const focusRingTight =
+  'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-secondary'
+
 /**
  * State layer in the current text color on ::before: hover 8%, focus 10%, pressed 10%.
  * The element must be `relative` (and clip or round its own corners).
@@ -27,3 +31,6 @@ export const touchTarget =
  * (two classes for the same property on one element don't have a reliable winner).
  */
 export const popoverReset = 'm-0 overflow-visible border-0 text-inherit [inset:auto]'
+
+/** 32% scrim behind modal surfaces. Fade it with scrimIn/scrimOut from motion.ts. */
+export const scrimClasses = 'absolute inset-0 bg-scrim opacity-32'

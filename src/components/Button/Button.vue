@@ -9,9 +9,10 @@
  * makes the button a toggle whose selection the group manages.
  */
 import { computed, useTemplateRef } from 'vue'
+import { touchTarget } from '../../internal/classes'
 import type { ButtonValue } from '../ButtonGroup/context'
 import type { ButtonShape, ButtonSize, ButtonVariant } from './types'
-import { buttonBaseClasses, touchTargetClasses, useButton } from './useButton'
+import { buttonBaseClasses, useButton } from './useButton'
 
 const props = withDefaults(
   defineProps<{
@@ -129,7 +130,7 @@ const classes = computed(() => {
   return [
     spec.value.container,
     outlined && spec.value.outline,
-    small && touchTargetClasses,
+    small && touchTarget,
     // Connected XS/S groups: 48dp minimum width
     connected.value && small && 'min-w-12',
     colors[props.variant][state],

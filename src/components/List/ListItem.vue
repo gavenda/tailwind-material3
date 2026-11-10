@@ -5,7 +5,7 @@
  *
  * - Default slot: headline (body-large). Props `overline`, `supportingText`
  *   (body-medium, up to 2 lines) and `trailingText`; slots of the same names work too.
- * - Leading: `leading-icon` (20dp) or `leading` (anything: avatar, image, checkbox).
+ * - Leading: `icon` (20dp) or `leading` (anything: avatar, image, checkbox).
  *   Trailing: `trailing-icon` (20dp) or `trailing`.
  * - Height follows the content: 56dp one line, 72dp two, 88dp three.
  * - `as` picks the element ('button', 'a', RouterLink…); buttons and links, or
@@ -13,7 +13,7 @@
  *   (4dp → 12dp hovered → 16dp focused/selected).
  */
 import { computed, inject, useSlots, type Component } from 'vue'
-import { focusRingInset } from '../../internal/classes'
+import { focusRingInset, stateLayer } from '../../internal/classes'
 import { listKey } from './context'
 
 defineOptions({ inheritAttrs: false })
@@ -63,9 +63,7 @@ const classes = computed(() => {
       'cursor-pointer',
       !props.selected && 'hover:rounded-[12px] focus-visible:rounded-2xl',
       focusRingInset,
-      // State layer in the label color: hover 8%, focus/pressed 10%
-      'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-      'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+      stateLayer,
     ],
     props.disabled && 'pointer-events-none',
   ]
@@ -91,8 +89,8 @@ const muted = computed(() => (props.selected ? 'text-on-secondary-container' : '
     ]"
   >
     <span :class="['contents', disabled && '*:opacity-38']">
-      <span v-if="$slots['leading-icon']" :class="['inline-flex size-5 shrink-0 *:size-full', muted]" aria-hidden="true">
-        <slot name="leading-icon" />
+      <span v-if="$slots.icon" :class="['inline-flex size-5 shrink-0 *:size-full', muted]" aria-hidden="true">
+        <slot name="icon" />
       </span>
       <span v-else-if="$slots.leading" class="inline-flex shrink-0">
         <slot name="leading" />

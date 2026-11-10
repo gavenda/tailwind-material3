@@ -29,7 +29,7 @@ const results2 = computed(() => matches(query2.value))
             <template #default="{ close }">
               <List>
                 <ListItem v-for="f in results" :key="f" as="button" @click="(picked = f), (query = f), close()">
-                  <template #leading-icon><Icon :svg="icons.search" /></template>
+                  <template #icon><Icon :svg="icons.search" /></template>
                   {{ f }}
                 </ListItem>
                 <ListItem v-if="!results.length">No results</ListItem>

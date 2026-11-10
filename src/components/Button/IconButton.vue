@@ -9,10 +9,11 @@
  * so toggles can swap icons. Works inside a ButtonGroup like Button does.
  */
 import { computed, inject, useTemplateRef } from 'vue'
+import { touchTarget } from '../../internal/classes'
 import type { ButtonValue } from '../ButtonGroup/context'
 import type { ButtonShape, ButtonSize } from './types'
 import { toolbarButtonColors, toolbarKey } from '../Toolbar/context'
-import { buttonBaseClasses, touchTargetClasses, useButton } from './useButton'
+import { buttonBaseClasses, useButton } from './useButton'
 
 export type IconButtonVariant = 'filled' | 'tonal' | 'outlined' | 'standard'
 export type IconButtonWidth = 'narrow' | 'default' | 'wide'
@@ -139,7 +140,7 @@ const classes = computed(() => {
     spec.value.height,
     spec.value.widths[props.width],
     props.variant === 'outlined' && spec.value.outline,
-    small && touchTargetClasses,
+    small && touchTarget,
     // Connected XS/S groups: 48dp minimum width
     connected.value && small && 'min-w-12',
     toolbar && props.variant === 'standard' ? toolbarButtonColors[toolbar.color][state] : colors[props.variant][state],

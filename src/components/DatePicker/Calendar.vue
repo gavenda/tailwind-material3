@@ -7,6 +7,7 @@
  * Home/End to the start/end of the week, Enter/Space select.
  */
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { focusRingTight, stateLayer } from '../../internal/classes'
 import { addDays, addMonths, firstDayOfWeek, inRange, monthGrid, sameDay, sameMonth, startOfDay } from './dates'
 
 const props = withDefaults(
@@ -154,9 +155,8 @@ const size = computed(() => (props.cell === 'l' ? 'size-12' : 'size-10'))
           :class="[
             'relative flex cursor-pointer items-center justify-center rounded-full text-body-large',
             size,
-            'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-secondary',
-            'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-            'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+            focusRingTight,
+            stateLayer,
             'disabled:pointer-events-none disabled:opacity-38',
             isSelected(d)
               ? 'bg-primary text-on-primary'

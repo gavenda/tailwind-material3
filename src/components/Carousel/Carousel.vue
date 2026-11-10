@@ -14,6 +14,7 @@
  * Scrolling snaps to items. Height comes from `height` (or the parent for full-screen).
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { focusRing } from '../../internal/classes'
 
 export type CarouselLayout = 'multi-browse' | 'hero' | 'uncontained' | 'full-screen'
 
@@ -185,7 +186,8 @@ const snapPoints = computed(() => {
     :aria-label="label"
     tabindex="0"
     :class="[
-      'relative [scrollbar-width:none] focus:outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-secondary focus-visible:outline-solid',
+      'relative [scrollbar-width:none]',
+      focusRing,
       layout === 'full-screen'
         ? 'h-full snap-y snap-mandatory overflow-y-auto'
         : 'snap-x snap-mandatory overflow-x-auto overscroll-x-contain',

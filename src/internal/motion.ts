@@ -12,6 +12,14 @@ export function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
+/** Fades a 32% scrim in (enter) or out (leave; it stays hidden until removed). */
+export function scrimIn(el: Element | null | undefined, duration = 300) {
+  return animate(el, [{ opacity: 0 }, { opacity: 0.32 }], { duration, easing: 'linear' })
+}
+export function scrimOut(el: Element | null | undefined, duration = 150) {
+  return animate(el, [{ opacity: 0.32 }, { opacity: 0 }], { duration, easing: 'linear', fill: 'forwards' })
+}
+
 /**
  * Runs an animation and resolves when it ends or is cancelled.
  * Resolves straight away when motion is reduced or the element is missing.

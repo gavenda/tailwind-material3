@@ -10,7 +10,7 @@
  * - Clicking closes the menu unless `keepOpen`. Listen with @click.
  */
 import { computed, inject } from 'vue'
-import { focusRingInset } from '../../internal/classes'
+import { focusRingInset, stateLayer } from '../../internal/classes'
 import { menuKey } from './context'
 
 const props = withDefaults(
@@ -65,9 +65,7 @@ function onClick() {
       // 4dp corners; the group's first and last items get 12dp outer corners; selected: 12dp all round.
       isSelected ? 'rounded-[12px]' : 'rounded-[4px] first-of-type:rounded-t-[12px] last-of-type:rounded-b-[12px]',
       focusRingInset,
-      // State layer: hover 8%, focus/pressed 10%
-      'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-      'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+      stateLayer,
       'disabled:pointer-events-none disabled:opacity-38',
       colors.item,
     ]"

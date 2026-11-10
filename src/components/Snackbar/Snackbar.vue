@@ -13,6 +13,7 @@
  * Show one at a time; queue them in your app if needed.
  */
 import { onBeforeUnmount, watch } from 'vue'
+import { focusRingTight, stateLayer } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
 
 const props = withDefaults(
@@ -97,9 +98,8 @@ function onAction() {
             type="button"
             :class="[
               'relative inline-flex h-10 cursor-pointer items-center rounded-full px-3 text-label-large text-inverse-primary',
-              'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-secondary',
-              'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-              'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+              focusRingTight,
+              stateLayer,
             ]"
             @click="onAction"
           >

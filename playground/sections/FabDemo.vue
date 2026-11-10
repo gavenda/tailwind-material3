@@ -15,23 +15,24 @@ const last = ref('')
   <section>
     <h2 class="mb-4 text-xl">FABs</h2>
     <div class="mb-6 flex flex-wrap items-end gap-4">
-      <Fab v-for="size in sizes" :key="size" :size="size" :aria-label="`Edit (${size})`">
+      <Fab v-for="size in sizes" :key="size" :size="size" :label="`Edit (${size})`">
         <template #icon><Icon :svg="icons.edit" /></template>
       </Fab>
     </div>
     <div class="mb-6 flex flex-wrap items-center gap-4">
-      <Fab v-for="color in colors" :key="color" :color="color" :aria-label="color">
+      <Fab v-for="color in colors" :key="color" :color="color" :label="color">
         <template #icon><Icon :svg="icons.add" /></template>
       </Fab>
-      <Fab lowered aria-label="Lowered"><template #icon><Icon :svg="icons.add" /></template></Fab>
-      <Fab disabled aria-label="Disabled"><template #icon><Icon :svg="icons.add" /></template></Fab>
+      <Fab lowered label="Lowered"><template #icon><Icon :svg="icons.add" /></template></Fab>
+      <Fab disabled label="Disabled"><template #icon><Icon :svg="icons.add" /></template></Fab>
     </div>
 
     <h3 class="mb-3 text-title-medium">Extended</h3>
     <label class="mb-4 flex items-center gap-3 text-body-medium"><Switch v-model="expanded" /> Expanded</label>
     <div class="mb-6 flex flex-wrap items-end gap-4">
-      <Fab v-for="size in sizes" :key="size" :size="size" label="Compose" :expanded="expanded" color="tertiary-container">
+      <Fab v-for="size in sizes" :key="size" :size="size" :expanded="expanded" color="tertiary-container">
         <template #icon><Icon :svg="icons.edit" /></template>
+        Compose
       </Fab>
     </div>
 

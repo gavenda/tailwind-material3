@@ -6,7 +6,7 @@
  *
  * - `v-model` binds the value. `multiline` renders a <textarea> (`rows` lines tall).
  * - `label` floats up when the field is focused or has a value.
- * - Slots: `leading-icon`, `trailing-icon` (24dp; put an IconButton there for actions),
+ * - Slots: `icon` (leading), `trailing-icon` (24dp; put an IconButton there for actions),
  *   `supporting-text`. Props `prefix` / `suffix` show next to the value.
  * - `error` colors it with the error role; `errorText` replaces the supporting text.
  * - `counter` with `maxlength` shows "n/max" at the end of the supporting row.
@@ -79,7 +79,7 @@ const text = computed(() => (model.value == null ? '' : String(model.value)))
 const populated = computed(() => text.value.length > 0)
 const floated = computed(() => focused.value || populated.value || (!!props.placeholder && !props.label))
 const outlined = computed(() => props.variant === 'outlined')
-const hasLeading = computed(() => !!slots['leading-icon'])
+const hasLeading = computed(() => !!slots.icon)
 const hasTrailing = computed(() => !!slots['trailing-icon'])
 
 const maxLength = computed(() => {
@@ -194,7 +194,7 @@ const contentEnd = computed(() => (hasTrailing.value ? 'pe-13' : 'pe-4'))
         v-if="hasLeading"
         :class="['absolute start-3 top-4 inline-flex size-6 *:size-full', tone.icon]"
       >
-        <slot name="leading-icon" />
+        <slot name="icon" />
       </span>
 
       <label

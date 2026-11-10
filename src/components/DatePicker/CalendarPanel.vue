@@ -5,10 +5,12 @@
  * Tokens: md.comp.date-picker.modal.year-selection, md.comp.date-picker.docked.menu-button
  */
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { focusRingTight, stateLayer } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
 import IconButton from '../Button/IconButton.vue'
 import Calendar from './Calendar.vue'
 import { addMonths, startOfMonth } from './dates'
+import { datePickerLabels, type DatePickerLabels } from './labels'
 
 const props = withDefaults(
   defineProps<{
@@ -19,8 +21,7 @@ const props = withDefaults(
     max?: Date | null
     locale?: string
     cell?: 'm' | 'l'
-    prevLabel?: string
-    nextLabel?: string
+    labels?: DatePickerLabels
   }>(),
   {
     selected: null,
@@ -30,8 +31,7 @@ const props = withDefaults(
     max: null,
     locale: undefined,
     cell: 'm',
-    prevLabel: 'Previous month',
-    nextLabel: 'Next month',
+    labels: () => datePickerLabels,
   },
 )
 
@@ -84,9 +84,8 @@ const canNext = computed(() => !props.max || addMonths(month.value, 1) <= props.
         :aria-expanded="years"
         :class="[
           'relative inline-flex h-10 cursor-pointer items-center gap-1 rounded-full ps-2 pe-1 text-label-large text-on-surface-variant',
-          'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-secondary',
-          'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-          'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+          focusRingTight,
+          stateLayer,
         ]"
         @click="toggleYears"
       >
@@ -101,10 +100,10 @@ const canNext = computed(() => !props.max || addMonths(month.value, 1) <= props.
         </svg>
       </button>
       <div v-if="!years" class="ms-auto flex">
-        <IconButton variant="standard" :label="prevLabel" :disabled="!canPrev" @click="month = addMonths(month, -1)">
+        <IconButton variant="standard" :label="labels.previousMonth" :disabled="!canPrev" @click="month = addMonths(month, -1)">
           <svg viewBox="0 -960 960 960" fill="currentColor" class="rtl:-scale-x-100"><path :d="iconPaths.chevronLeft" /></svg>
         </IconButton>
-        <IconButton variant="standard" :label="nextLabel" :disabled="!canNext" @click="month = addMonths(month, 1)">
+        <IconButton variant="standard" :label="labels.nextMonth" :disabled="!canNext" @click="month = addMonths(month, 1)">
           <svg viewBox="0 -960 960 960" fill="currentColor" class="rtl:-scale-x-100"><path :d="iconPaths.chevronRight" /></svg>
         </IconButton>
       </div>
@@ -119,9 +118,8 @@ const canNext = computed(() => !props.max || addMonths(month.value, 1) <= props.
         :aria-pressed="y === month.getFullYear()"
         :class="[
           'relative mx-auto inline-flex h-9 w-18 cursor-pointer items-center justify-center rounded-full text-body-large',
-          'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-secondary',
-          'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-          'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+          focusRingTight,
+          stateLayer,
           y === month.getFullYear() ? 'bg-primary text-on-primary' : 'text-on-surface-variant',
         ]"
         @click="pickYear(y)"

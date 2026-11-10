@@ -67,6 +67,21 @@ segmented buttons → connected `ButtonGroup`, navigation drawer → expanded
 Each component's source starts with a comment describing its props, slots and
 behaviour; the playground has a demo of every one.
 
+### Naming
+
+The same names mean the same thing everywhere:
+
+- **Slots:** `icon` is the leading (or only) icon and `trailing-icon` the trailing
+  one. `leading` / `trailing` take any content (buttons, avatars, checkboxes).
+- **`label`** is the accessible name, except on text fields (`TextField`,
+  `DateField`), where it's the visible floating label. Visible text goes in the
+  default slot (`Button`, extended `Fab`, `MenuItem`, …).
+- **`v-model:open`** shows and hides anything that opens: menus, tooltips,
+  dialogs, sheets, search, pickers.
+- **Picker text:** `DatePicker`, `DateField` and `TimePicker` take a `labels`
+  object for translation, e.g. `:labels="{ confirm: 'Aceptar', cancel: 'Cancelar' }"`.
+  Dates, months and AM/PM follow `locale`.
+
 Menus, tooltips and the docked date picker use the Popover API; dialogs, sheets,
 search and the modal pickers use `<dialog>`. Both are supported in all current
 browsers.

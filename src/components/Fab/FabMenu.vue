@@ -12,6 +12,7 @@
  * - Place it yourself (e.g. `class="fixed end-4 bottom-4"`); items open upwards, end-aligned.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, provide, reactive, useId, useTemplateRef, watch } from 'vue'
+import { focusRing, stateLayer } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
 import { animate } from '../../internal/motion'
 import { useRovingFocus } from '../../internal/useRovingFocus'
@@ -143,9 +144,9 @@ function onKeydown(e: KeyboardEvent) {
       :class="[
         'relative inline-flex cursor-pointer items-center justify-center shadow-elevation-3 select-none',
         'transition-[width,height,border-radius,background-color] duration-(--duration-spring-fast-spatial) ease-spring-fast-spatial motion-reduce:transition-none',
-        'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
-        'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-        'hover:shadow-elevation-4 hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+        focusRing,
+        stateLayer,
+        'hover:shadow-elevation-4',
         button,
       ]"
       @click="open = !open"

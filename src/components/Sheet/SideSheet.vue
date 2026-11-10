@@ -13,8 +13,9 @@
  *   Shows a close button; `showBack` adds a back button that emits `back`.
  */
 import { computed, useId, useTemplateRef } from 'vue'
+import { scrimClasses } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate, EMPHASIZED_ACCELERATE, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { animate, EMPHASIZED_ACCELERATE, EMPHASIZED_DECELERATE, scrimIn, scrimOut } from '../../internal/motion'
 import { useDialog } from '../../internal/useDialog'
 import IconButton from '../Button/IconButton.vue'
 
@@ -55,7 +56,7 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
   enter: () =>
     Promise.all([
       animate(sheet.value, [{ transform: offscreen() }, { transform: 'none' }], { duration: 450, easing: EMPHASIZED_DECELERATE }),
-      animate(scrim.value, [{ opacity: 0 }, { opacity: 0.32 }], { duration: 300, easing: 'linear' }),
+      scrimIn(scrim.value),
     ]),
   leave: () =>
     Promise.all([
@@ -64,7 +65,7 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
         easing: EMPHASIZED_ACCELERATE,
         fill: 'forwards',
       }),
-      animate(scrim.value, [{ opacity: 0.32 }, { opacity: 0 }], { duration: 250, easing: 'linear', fill: 'forwards' }),
+      scrimOut(scrim.value, 250),
     ]),
 })
 
@@ -91,7 +92,7 @@ const panelShape = computed(() => (props.detached ? 'm-4 h-[calc(100%-2rem)] rou
     @cancel="onCancel"
     @close="onClose"
   >
-    <div v-if="modal" ref="scrim" class="absolute inset-0 bg-scrim opacity-32" @click="cancel" />
+    <div v-if="modal" ref="scrim" :class="scrimClasses" @click="cancel" />
     <div
       ref="sheet"
       :class="[

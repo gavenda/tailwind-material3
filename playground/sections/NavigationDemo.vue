@@ -45,8 +45,9 @@ const modal = ref(false)
           <IconButton variant="standard" :label="isExpanded ? 'Collapse' : 'Expand'" @click="toggle">
             <Icon :svg="isExpanded ? icons.close : icons.menu" />
           </IconButton>
-          <Fab color="tertiary-container" label="Compose" :expanded="isExpanded" lowered>
+          <Fab color="tertiary-container" :expanded="isExpanded" lowered>
             <template #icon><Icon :svg="icons.edit" /></template>
+            Compose
           </Fab>
         </template>
         <NavigationItem v-for="d in destinations" :key="d.value" :value="d.value" :label="d.label" :badge="d.badge">

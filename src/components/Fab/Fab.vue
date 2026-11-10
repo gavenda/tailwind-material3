@@ -6,13 +6,14 @@
  * Tokens: md.comp.fab.{primary-container,…,tertiary} + md.comp.fab{,.medium,.large}
  *         md.comp.extended-fab.{small,medium,large}
  *
- * - Icon in the `icon` slot. Give it `label` text to make it an extended FAB;
+ * - Icon in the `icon` slot. Text in the default slot makes it an extended FAB;
  *   `expanded` (default true) collapses it back to a plain FAB with an animation,
- *   e.g. while the page scrolls.
- * - Without a visible label, `ariaLabel` is required for an accessible name.
+ *   e.g. while the page scrolls. The collapsed text still names the button.
+ * - Without text, `label` is required: it's the accessible name (as on IconButton).
  * - `lowered` uses the lower elevation for FABs on a surface (e.g. in a toolbar).
  */
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
+import { focusRing, stateLayer } from '../../internal/classes'
 
 export type FabSize = 'small' | 'medium' | 'large'
 export type FabColor =
@@ -27,12 +28,10 @@ const props = withDefaults(
   defineProps<{
     size?: FabSize
     color?: FabColor
-    /** Visible label: makes it an extended FAB. */
+    /** Accessible name. Required when there's no text in the default slot. */
     label?: string
-    /** Extended FAB only: show the label. */
+    /** Extended FAB only: show the text. */
     expanded?: boolean
-    /** Accessible name when there's no visible label. */
-    ariaLabel?: string
     lowered?: boolean
     type?: 'button' | 'submit' | 'reset'
     disabled?: boolean
@@ -42,7 +41,6 @@ const props = withDefaults(
     color: 'primary-container',
     label: undefined,
     expanded: true,
-    ariaLabel: undefined,
     lowered: false,
     type: 'button',
     disabled: false,
@@ -75,7 +73,8 @@ const colors: Record<FabColor, string> = {
   tertiary: 'bg-tertiary text-on-tertiary',
 }
 
-const extended = computed(() => !!props.label)
+const slots = useSlots()
+const extended = computed(() => !!slots.default)
 const spec = computed(() => sizes[props.size])
 
 // Elevation 3, hover 4; lowered: 1, hover 2. Focus and pressed return to resting.
@@ -90,14 +89,12 @@ const elevation = computed(() =>
   <button
     :type="type"
     :disabled="disabled"
-    :aria-label="extended && expanded ? undefined : (ariaLabel ?? label)"
+    :aria-label="extended ? undefined : label"
     :class="[
       'relative inline-flex shrink-0 cursor-pointer items-center justify-center select-none',
       'transition-[box-shadow,padding] duration-(--duration-spring-fast-spatial) ease-spring-fast-spatial motion-reduce:transition-none',
-      'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
-      // State layer: hover 8%, focus/pressed 10%
-      'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-      'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+      focusRing,
+      stateLayer,
       'disabled:pointer-events-none disabled:bg-on-surface/10 disabled:text-on-surface/38 disabled:shadow-none',
       spec.box,
       extended && spec.pad,
@@ -117,7 +114,7 @@ const elevation = computed(() =>
       ]"
     >
       <span :class="['overflow-hidden whitespace-nowrap', spec.text]">
-        <span :class="['inline-block', spec.gap]">{{ label }}</span>
+        <span :class="['inline-block', spec.gap]"><slot /></span>
       </span>
     </span>
   </button>

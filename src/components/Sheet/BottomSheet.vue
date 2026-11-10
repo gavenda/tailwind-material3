@@ -11,7 +11,8 @@
  * - Up to 640dp wide, centred, 28dp top corners, surface-container-low.
  */
 import { ref, useTemplateRef } from 'vue'
-import { animate, EMPHASIZED_ACCELERATE, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { scrimClasses } from '../../internal/classes'
+import { animate, EMPHASIZED_ACCELERATE, EMPHASIZED_DECELERATE, scrimIn, scrimOut } from '../../internal/motion'
 import { useDialog } from '../../internal/useDialog'
 
 const props = withDefaults(
@@ -50,7 +51,7 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
         duration: 500,
         easing: EMPHASIZED_DECELERATE,
       }),
-      animate(scrim.value, [{ opacity: 0 }, { opacity: 0.32 }], { duration: 300, easing: 'linear' }),
+      scrimIn(scrim.value),
     ]),
   leave: () =>
     Promise.all([
@@ -59,7 +60,7 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
         [{ transform: `translateY(${drag.value}px)` }, { transform: 'translateY(100%)' }],
         { duration: 250, easing: EMPHASIZED_ACCELERATE, fill: 'forwards' },
       ),
-      animate(scrim.value, [{ opacity: 0.32 }, { opacity: 0 }], { duration: 250, easing: 'linear', fill: 'forwards' }),
+      scrimOut(scrim.value, 250),
     ]).then(() => (drag.value = 0)),
 })
 
@@ -121,7 +122,7 @@ function onPointerUp() {
     @cancel="onCancel"
     @close="onClose"
   >
-    <div v-if="modal" ref="scrim" class="absolute inset-0 bg-scrim opacity-32" @click="cancel" />
+    <div v-if="modal" ref="scrim" :class="scrimClasses" @click="cancel" />
 
     <div :class="['pointer-events-none flex justify-center', modal ? 'absolute inset-x-0 bottom-0 top-14' : '']">
       <div

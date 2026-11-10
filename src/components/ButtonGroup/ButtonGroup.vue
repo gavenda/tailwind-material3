@@ -9,6 +9,7 @@
  * - connected: 2dp apart with tighter inner corners; selection changes only that button.
  */
 import { onBeforeUnmount, provide, shallowRef } from 'vue'
+import { prefersReducedMotion } from '../../internal/motion'
 import type { ButtonShape, ButtonSize } from '../Button/types'
 import {
   buttonGroupKey,
@@ -123,10 +124,6 @@ const SPRING_MS = 360
 
 let natural: Map<HTMLElement, number> | null = null
 let resetTimer: ReturnType<typeof setTimeout> | undefined
-
-function prefersReducedMotion() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
 
 function itemFor(target: EventTarget | null) {
   const el = target instanceof Element ? target.closest('button, a') : null

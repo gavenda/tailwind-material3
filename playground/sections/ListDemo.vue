@@ -16,7 +16,7 @@ const done = ref(false)
       <List class="w-80">
         <ListItem>Single line item</ListItem>
         <ListItem supporting-text="Supporting text">
-          <template #leading-icon><Icon :svg="icons.person" /></template>
+          <template #icon><Icon :svg="icons.person" /></template>
           Two line item
         </ListItem>
         <ListItem overline="Overline" supporting-text="Supporting text that is long enough to wrap onto a second line" trailing-text="100+">
@@ -46,7 +46,7 @@ const done = ref(false)
             :trailing-text="item.count"
             @click="selected = item.id"
           >
-            <template #leading-icon><Icon :svg="item.icon" /></template>
+            <template #icon><Icon :svg="item.icon" /></template>
             {{ item.label }}
           </ListItem>
           <ListItem as="label" interactive supporting-text="Segmented list item">

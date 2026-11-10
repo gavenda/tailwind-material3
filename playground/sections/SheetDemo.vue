@@ -42,7 +42,7 @@ const sideStandard = ref(true)
           { label: 'Edit name', icon: icons.edit },
           { label: 'Delete', icon: icons.deleteIcon },
         ]" :key="item.label" as="button" @click="bottom = false">
-          <template #leading-icon><Icon :svg="item.icon" /></template>
+          <template #icon><Icon :svg="item.icon" /></template>
           {{ item.label }}
         </ListItem>
       </List>

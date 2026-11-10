@@ -6,17 +6,20 @@
  *
  * - `v-model` is the date (Date | null). Type it in the locale's numeric format, or open
  *   the calendar with the trailing button; picking a day sets it and closes the calendar.
- * - `label`, `variant`, `supportingText`, `min`, `max`, `locale` as on TextField/DatePicker.
+ * - `label`, `variant`, `supportingText`, `min`, `max`, `locale`, `labels` as on
+ *   TextField/DatePicker. `label` defaults to `labels.date`.
  */
 import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
-import { iconPaths } from '../../internal/icons'
 import { popoverReset } from '../../internal/classes'
+import { iconPaths } from '../../internal/icons'
 import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { fill, useLabels } from '../../internal/labels'
 import { usePopover } from '../../internal/usePopover'
 import IconButton from '../Button/IconButton.vue'
 import TextField, { type TextFieldVariant } from '../TextField/TextField.vue'
 import CalendarPanel from './CalendarPanel.vue'
 import { datePattern, formatNumeric, inRange, parseDate } from './dates'
+import { datePickerLabels, type DatePickerLabels } from './labels'
 
 const props = withDefaults(
   defineProps<{
@@ -27,21 +30,23 @@ const props = withDefaults(
     max?: Date | null
     locale?: string
     disabled?: boolean
-    openLabel?: string
+    labels?: Partial<DatePickerLabels>
   }>(),
   {
-    label: 'Date',
+    label: undefined,
     variant: 'outlined',
     supportingText: undefined,
     min: null,
     max: null,
     locale: undefined,
     disabled: false,
-    openLabel: 'Choose date',
+    labels: undefined,
   },
 )
 
 const value = defineModel<Date | null>({ default: null })
+const strings = useLabels(datePickerLabels, () => props.labels)
+const fieldLabel = computed(() => props.label ?? strings.value.date)
 
 const popupId = useId()
 const field = useTemplateRef<HTMLElement>('field')
@@ -89,11 +94,11 @@ function pick(d: Date) {
     ref="field"
     v-model="text"
     :variant="variant"
-    :label="label"
+    :label="fieldLabel"
     :placeholder="pattern"
     :supporting-text="supportingText ?? pattern"
     :error="error"
-    :error-text="`Use ${pattern}`"
+    :error-text="fill(strings.invalidDate, { pattern })"
     :disabled="disabled"
     inputmode="numeric"
     @blur="commitText"
@@ -102,7 +107,7 @@ function pick(d: Date) {
     <template #trailing-icon>
       <IconButton
         variant="standard"
-        :label="openLabel"
+        :label="strings.openCalendar"
         :disabled="disabled"
         aria-haspopup="dialog"
         :aria-expanded="isOpen"
@@ -120,9 +125,9 @@ function pick(d: Date) {
     ref="popup"
     popover="auto"
     role="dialog"
-    :aria-label="label"
+    :aria-label="fieldLabel"
     :class="[popoverReset, 'z-50 w-90 max-w-[calc(100vw-1rem)] rounded-2xl bg-surface-container-high px-0 pt-0 pb-3 shadow-elevation-3']"
   >
-    <CalendarPanel :selected="value" :min="min" :max="max" :locale="locale" cell="l" @select="pick" />
+    <CalendarPanel :selected="value" :min="min" :max="max" :locale="locale" cell="l" :labels="strings" @select="pick" />
   </div>
 </template>

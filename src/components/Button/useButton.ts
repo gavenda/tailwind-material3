@@ -3,6 +3,7 @@
  * and corner shapes (resting, pressed, selected, connected-group).
  */
 import { computed, inject, onBeforeUnmount, onMounted, type Ref, type ShallowRef } from 'vue'
+import { focusRing, stateLayer } from '../../internal/classes'
 import { buttonGroupKey, type ButtonValue } from '../ButtonGroup/context'
 import type { ButtonShape, ButtonSize } from './types'
 
@@ -28,20 +29,13 @@ export const shapeTokens: Record<ButtonSize, ShapeSpec> = {
 
 /** Classes every button container shares. Corners come from the CSS variables in `corners`. */
 export const buttonBaseClasses = [
-  'relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap focus:outline-none select-none shape-morph',
+  'relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap select-none shape-morph',
   'rounded-s-(--corner-s) rounded-e-(--corner-e) active:rounded-s-(--corner-s-pressed) active:rounded-e-(--corner-e-pressed)',
-  // Focus indicator: 3dp secondary, 2dp outer offset
-  'focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
-  // State layer in the content color: hover 8%, focus 10%, pressed 10%
-  'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-  'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+  focusRing,
+  stateLayer,
   // Disabled: content on-surface @ 38%, no elevation or state layer
   'disabled:pointer-events-none disabled:text-on-surface/38 disabled:shadow-none',
 ]
-
-/** XS and S get an invisible 48dp touch target. */
-export const touchTargetClasses =
-  'after:absolute after:top-1/2 after:left-1/2 after:h-12 after:w-[max(100%,3rem)] after:-translate-1/2'
 
 export interface ButtonBaseProps {
   size?: ButtonSize

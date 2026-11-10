@@ -10,14 +10,17 @@
  * - Dial: click or drag; picking an hour moves on to minutes. The dial is a slider for
  *   keyboard users (arrow keys, PageUp/PageDown, Home/End).
  * - The keyboard button switches to typing hours and minutes; `inputMode` starts there.
+ * - `labels` overrides any of the English text (see TimePickerLabels); AM/PM follow `locale`.
  */
 import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
-import { focusRing, stateLayer } from '../../internal/classes'
+import { focusRing, focusRingInset, scrimClasses, stateLayer } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { animate, EMPHASIZED_DECELERATE, scrimIn, scrimOut } from '../../internal/motion'
+import { fill, useLabels } from '../../internal/labels'
 import { useDialog } from '../../internal/useDialog'
 import Button from '../Button/Button.vue'
 import IconButton from '../Button/IconButton.vue'
+import { timePickerLabels, type TimePickerLabels } from './labels'
 
 const props = withDefaults(
   defineProps<{
@@ -25,16 +28,14 @@ const props = withDefaults(
     inputMode?: boolean
     locale?: string
     title?: string
-    confirmLabel?: string
-    cancelLabel?: string
+    labels?: Partial<TimePickerLabels>
   }>(),
   {
     hour12: undefined,
     inputMode: false,
     locale: undefined,
     title: undefined,
-    confirmLabel: 'OK',
-    cancelLabel: 'Cancel',
+    labels: undefined,
   },
 )
 
@@ -43,11 +44,19 @@ const value = defineModel<string | null>({ default: null })
 const emit = defineEmits<{ cancel: []; closed: [] }>()
 
 const titleId = useId()
+const strings = useLabels(timePickerLabels, () => props.labels)
 
 const use12 = computed(() => {
   if (props.hour12 !== undefined) return props.hour12
   const cycle = new Intl.DateTimeFormat(props.locale, { hour: 'numeric' }).resolvedOptions().hourCycle
   return cycle === 'h12' || cycle === 'h11'
+})
+
+/** The locale's AM and PM text. */
+const periods = computed(() => {
+  const format = new Intl.DateTimeFormat(props.locale, { hour: 'numeric', hour12: true })
+  const name = (h: number) => format.formatToParts(new Date(2000, 0, 1, h)).find((p) => p.type === 'dayPeriod')?.value
+  return { am: name(9) ?? 'AM', pm: name(21) ?? 'PM' }
 })
 
 // --- Draft (24-hour)
@@ -173,9 +182,11 @@ function onDialKeydown(e: KeyboardEvent) {
   e.preventDefault()
 }
 
-const dialLabel = computed(() => (part.value === 'hour' ? 'Hour' : 'Minute'))
+const dialLabel = computed(() => (part.value === 'hour' ? strings.value.hour : strings.value.minute))
 const dialValueText = computed(() =>
-  part.value === 'hour' ? `${displayHour.value}${use12.value ? (pm.value ? ' PM' : ' AM') : ''}` : `${minutes.value} minutes`,
+  part.value === 'hour'
+    ? `${displayHour.value}${use12.value ? ` ${pm.value ? periods.value.pm : periods.value.am}` : ''}`
+    : fill(strings.value.minutes, { minutes: minutes.value }),
 )
 
 // --- Typing: the fields keep what's typed; valid numbers update the time, and the
@@ -220,12 +231,12 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
         duration: 300,
         easing: EMPHASIZED_DECELERATE,
       }),
-      animate(scrim.value, [{ opacity: 0 }, { opacity: 0.32 }], { duration: 300, easing: 'linear' }),
+      scrimIn(scrim.value),
     ]),
   leave: () =>
     Promise.all([
       animate(panel.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }),
-      animate(scrim.value, [{ opacity: 0.32 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }),
+      scrimOut(scrim.value),
     ]),
 })
 
@@ -248,14 +259,14 @@ const selectorBox = (active: boolean) => [
     @cancel="onCancel"
     @close="onClose"
   >
-    <div ref="scrim" class="absolute inset-0 bg-scrim opacity-32" @click="cancel" />
+    <div ref="scrim" :class="scrimClasses" @click="cancel" />
     <div class="pointer-events-none relative flex size-full items-center justify-center p-4">
       <div
         ref="panel"
         class="pointer-events-auto flex flex-col rounded-[28px] bg-surface-container-high p-6 pb-5 font-plain shadow-elevation-3"
       >
         <span :id="titleId" class="mb-5 text-label-medium text-on-surface-variant">
-          {{ title ?? (typing ? 'Enter time' : 'Select time') }}
+          {{ title ?? (typing ? strings.enterTime : strings.selectTime) }}
         </span>
 
         <!-- Time selectors: hour : minute, then AM/PM -->
@@ -267,7 +278,7 @@ const selectorBox = (active: boolean) => [
                   v-model="hourText"
                   inputmode="numeric"
                   maxlength="2"
-                  aria-label="Hour"
+                  :aria-label="strings.hour"
                   :class="[
                     selectorBox(true),
                     'text-center caret-primary outline-none focus:outline-2 focus:outline-solid focus:outline-primary',
@@ -277,7 +288,7 @@ const selectorBox = (active: boolean) => [
                   @blur="syncTyped"
                   @keydown.enter="confirm"
                 />
-                <span class="text-body-small text-on-surface-variant">Hour</span>
+                <span class="text-body-small text-on-surface-variant">{{ strings.hour }}</span>
               </label>
               <span class="mb-7 w-6 text-center font-brand text-display-large text-on-surface">:</span>
               <label class="flex flex-col gap-2">
@@ -285,7 +296,7 @@ const selectorBox = (active: boolean) => [
                   v-model="minuteText"
                   inputmode="numeric"
                   maxlength="2"
-                  aria-label="Minute"
+                  :aria-label="strings.minute"
                   :class="[
                     selectorBox(false),
                     'text-center caret-primary outline-none focus:bg-primary-container focus:text-on-primary-container focus:outline-2 focus:outline-solid focus:outline-primary',
@@ -295,15 +306,15 @@ const selectorBox = (active: boolean) => [
                   @blur="syncTyped"
                   @keydown.enter="confirm"
                 />
-                <span class="text-body-small text-on-surface-variant">Minute</span>
+                <span class="text-body-small text-on-surface-variant">{{ strings.minute }}</span>
               </label>
             </template>
             <template v-else>
-              <button type="button" aria-label="Hour" :aria-pressed="part === 'hour'" :class="[selectorBox(part === 'hour'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'hour'">
+              <button type="button" :aria-label="strings.hour" :aria-pressed="part === 'hour'" :class="[selectorBox(part === 'hour'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'hour'">
                 {{ use12 ? displayHour : pad(displayHour) }}
               </button>
               <span class="w-6 text-center font-brand text-display-large text-on-surface">:</span>
-              <button type="button" aria-label="Minute" :aria-pressed="part === 'minute'" :class="[selectorBox(part === 'minute'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'minute'">
+              <button type="button" :aria-label="strings.minute" :aria-pressed="part === 'minute'" :class="[selectorBox(part === 'minute'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'minute'">
                 {{ pad(minutes) }}
               </button>
             </template>
@@ -313,7 +324,7 @@ const selectorBox = (active: boolean) => [
           <div
             v-if="use12"
             role="group"
-            aria-label="AM or PM"
+            :aria-label="strings.period"
             class="flex h-20 w-13 flex-col overflow-hidden rounded-[8px] border border-outline text-title-medium"
           >
             <button
@@ -323,14 +334,14 @@ const selectorBox = (active: boolean) => [
               :aria-pressed="pm === isPm"
               :class="[
                 'relative flex flex-1 cursor-pointer items-center justify-center',
-                'focus:outline-none focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-solid focus-visible:outline-secondary',
+                focusRingInset,
                 stateLayer,
                 isPm && 'border-t border-outline',
                 pm === isPm ? 'bg-tertiary-container text-on-tertiary-container' : 'text-on-surface-variant',
               ]"
               @click="setPeriod(isPm)"
             >
-              {{ isPm ? 'PM' : 'AM' }}
+              {{ isPm ? periods.pm : periods.am }}
             </button>
           </div>
         </div>
@@ -346,7 +357,7 @@ const selectorBox = (active: boolean) => [
           :aria-valuemin="0"
           :aria-valuemax="part === 'hour' ? 23 : 59"
           :aria-valuetext="dialValueText"
-          class="relative mx-auto mt-9 size-64 cursor-pointer touch-none rounded-full bg-surface-container-highest select-none focus:outline-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-secondary focus-visible:outline-solid"
+          :class="['relative mx-auto mt-9 size-64 cursor-pointer touch-none rounded-full bg-surface-container-highest select-none', focusRing]"
           @pointerdown="onPointerDown"
           @pointermove="onPointerMove"
           @pointerup="onPointerUp"
@@ -374,11 +385,11 @@ const selectorBox = (active: boolean) => [
         </div>
 
         <div class="mt-6 flex items-center gap-2">
-          <IconButton variant="standard" :label="typing ? 'Switch to clock' : 'Switch to text input'" class="-ms-3" @click="toggleMode">
+          <IconButton variant="standard" :label="typing ? strings.switchToClock : strings.switchToInput" class="-ms-3" @click="toggleMode">
             <svg viewBox="0 -960 960 960" fill="currentColor"><path :d="typing ? iconPaths.schedule : iconPaths.keyboard" /></svg>
           </IconButton>
-          <Button variant="text" class="ms-auto" @click="cancel">{{ cancelLabel }}</Button>
-          <Button variant="text" @click="confirm">{{ confirmLabel }}</Button>
+          <Button variant="text" class="ms-auto" @click="cancel">{{ strings.cancel }}</Button>
+          <Button variant="text" @click="confirm">{{ strings.confirm }}</Button>
         </div>
       </div>
     </div>

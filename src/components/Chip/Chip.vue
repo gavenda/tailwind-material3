@@ -12,6 +12,7 @@
  * Attributes and listeners (e.g. @click) go to the chip's button.
  */
 import { computed, useSlots } from 'vue'
+import { focusRing } from '../../internal/classes'
 
 defineOptions({ inheritAttrs: false })
 
@@ -122,7 +123,7 @@ function onClick() {
       :class="[
         'relative inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg border font-plain text-label-large whitespace-nowrap select-none transition-shadow',
         // Focus indicator: 3dp secondary, 2dp outer offset
-        'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
+        focusRing,
         // State layer in the label color (covers the outline): hover 8%, focus/pressed 10%, dragged 16%
         'before:pointer-events-none before:absolute before:-inset-px before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
         'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10 data-dragged:before:opacity-16',

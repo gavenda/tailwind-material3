@@ -10,17 +10,21 @@
  *   `v-model:end`.
  * - The pencil button switches to typing the date(s) in the locale's numeric format;
  *   `inputMode` starts there.
- * - `min` / `max` limit the choice. Text follows `locale` (default: the browser's).
+ * - `min` / `max` limit the choice. Dates follow `locale` (default: the browser's).
+ * - `labels` overrides any of the English text (see DatePickerLabels).
  */
 import { computed, ref, useId, useTemplateRef, watch } from 'vue'
+import { scrimClasses } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate, EMPHASIZED_DECELERATE } from '../../internal/motion'
+import { animate, EMPHASIZED_DECELERATE, scrimIn, scrimOut } from '../../internal/motion'
+import { fill, useLabels } from '../../internal/labels'
 import { useDialog } from '../../internal/useDialog'
 import Button from '../Button/Button.vue'
 import IconButton from '../Button/IconButton.vue'
 import TextField from '../TextField/TextField.vue'
 import CalendarPanel from './CalendarPanel.vue'
 import { datePattern, formatNumeric, inRange, parseDate, startOfDay } from './dates'
+import { datePickerLabels, type DatePickerLabels } from './labels'
 
 const props = withDefaults(
   defineProps<{
@@ -30,8 +34,7 @@ const props = withDefaults(
     max?: Date | null
     locale?: string
     title?: string
-    confirmLabel?: string
-    cancelLabel?: string
+    labels?: Partial<DatePickerLabels>
   }>(),
   {
     range: false,
@@ -40,8 +43,7 @@ const props = withDefaults(
     max: null,
     locale: undefined,
     title: undefined,
-    confirmLabel: 'OK',
-    cancelLabel: 'Cancel',
+    labels: undefined,
   },
 )
 
@@ -50,6 +52,7 @@ const value = defineModel<Date | null>({ default: null })
 const start = defineModel<Date | null>('start', { default: null })
 const end = defineModel<Date | null>('end', { default: null })
 const emit = defineEmits<{ cancel: []; closed: [] }>()
+const strings = useLabels(datePickerLabels, () => props.labels)
 
 // --- Draft
 const draft = ref<Date | null>(null)
@@ -93,6 +96,7 @@ function syncText() {
   textEnd.value = formatNumeric(draftEnd.value, props.locale)
 }
 const pattern = computed(() => datePattern(props.locale))
+const errorText = computed(() => fill(strings.value.invalidDate, { pattern: pattern.value }))
 
 function parsed(t: string) {
   if (!t.trim()) return { date: null, error: false }
@@ -123,14 +127,18 @@ function toggleMode() {
 // --- Header
 const fullFormat = computed(() => new Intl.DateTimeFormat(props.locale, { weekday: 'short', month: 'short', day: 'numeric' }))
 const shortFormat = computed(() => new Intl.DateTimeFormat(props.locale, { month: 'short', day: 'numeric' }))
-const supporting = computed(() => props.title ?? (props.range ? 'Select dates' : typing.value ? 'Enter date' : 'Select date'))
+const supporting = computed(() => {
+  if (props.title) return props.title
+  if (props.range) return strings.value.selectDates
+  return typing.value ? strings.value.enterDate : strings.value.selectDate
+})
 const headline = computed(() => {
   if (props.range) {
-    const s = draftStart.value ? shortFormat.value.format(draftStart.value) : 'Start date'
-    const e = draftEnd.value ? shortFormat.value.format(draftEnd.value) : 'End date'
+    const s = draftStart.value ? shortFormat.value.format(draftStart.value) : strings.value.startDate
+    const e = draftEnd.value ? shortFormat.value.format(draftEnd.value) : strings.value.endDate
     return `${s} – ${e}`
   }
-  return draft.value ? fullFormat.value.format(draft.value) : 'Selected date'
+  return draft.value ? fullFormat.value.format(draft.value) : strings.value.noDate
 })
 
 // --- Dialog
@@ -148,12 +156,12 @@ const { cancel, onCancel, onClose } = useDialog(dialog, open, {
         duration: 300,
         easing: EMPHASIZED_DECELERATE,
       }),
-      animate(scrim.value, [{ opacity: 0 }, { opacity: 0.32 }], { duration: 300, easing: 'linear' }),
+      scrimIn(scrim.value),
     ]),
   leave: () =>
     Promise.all([
       animate(panel.value, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }),
-      animate(scrim.value, [{ opacity: 0.32 }, { opacity: 0 }], { duration: 150, easing: 'linear', fill: 'forwards' }),
+      scrimOut(scrim.value),
     ]),
 })
 
@@ -185,7 +193,7 @@ function confirm() {
     @cancel="onCancel"
     @close="onClose"
   >
-    <div ref="scrim" class="absolute inset-0 bg-scrim opacity-32" @click="cancel" />
+    <div ref="scrim" :class="scrimClasses" @click="cancel" />
     <div class="pointer-events-none relative flex size-full items-center justify-center p-4">
       <!-- 360dp wide, 28dp corners, surface-container-high, elevation 3 -->
       <div
@@ -205,7 +213,7 @@ function confirm() {
             </h2>
             <IconButton
               variant="standard"
-              :label="typing ? 'Switch to calendar' : 'Switch to text input'"
+              :label="typing ? strings.switchToCalendar : strings.switchToInput"
               @click="toggleMode"
             >
               <svg viewBox="0 -960 960 960" fill="currentColor">
@@ -222,20 +230,20 @@ function confirm() {
             <TextField
               v-model="textStart"
               variant="outlined"
-              label="Start date"
+              :label="strings.startDate"
               :placeholder="pattern"
               :error="startInput.error"
-              :error-text="`Use ${pattern}`"
+              :error-text="errorText"
               class="w-auto min-w-0 flex-1"
               @keydown.enter="confirm"
             />
             <TextField
               v-model="textEnd"
               variant="outlined"
-              label="End date"
+              :label="strings.endDate"
               :placeholder="pattern"
               :error="endInput.error"
-              :error-text="`Use ${pattern}`"
+              :error-text="errorText"
               class="w-auto min-w-0 flex-1"
               @keydown.enter="confirm"
             />
@@ -244,11 +252,11 @@ function confirm() {
             v-else
             v-model="text"
             variant="outlined"
-            label="Date"
+            :label="strings.date"
             :placeholder="pattern"
             :supporting-text="pattern"
             :error="singleInput.error"
-            :error-text="`Invalid date. Use ${pattern}`"
+            :error-text="errorText"
             class="w-full"
             @keydown.enter="confirm"
           />
@@ -263,12 +271,13 @@ function confirm() {
           :min="min"
           :max="max"
           :locale="locale"
+          :labels="strings"
           @select="pick"
         />
 
         <div class="flex justify-end gap-2 px-3 pt-2 pb-5">
-          <Button variant="text" @click="cancel">{{ cancelLabel }}</Button>
-          <Button variant="text" :disabled="typing && inputError" @click="confirm">{{ confirmLabel }}</Button>
+          <Button variant="text" @click="cancel">{{ strings.cancel }}</Button>
+          <Button variant="text" :disabled="typing && inputError" @click="confirm">{{ strings.confirm }}</Button>
         </div>
       </div>
     </div>

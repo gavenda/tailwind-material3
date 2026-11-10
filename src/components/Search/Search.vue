@@ -4,7 +4,7 @@
  * Spec: https://m3.material.io/components/search/specs
  * Tokens: md.comp.search-bar, md.comp.search-view (contained)
  *
- * - `v-model` is the query; `v-model:active` opens the view (also opened by clicking the
+ * - `v-model` is the query; `v-model:open` opens the view (also opened by clicking the
  *   bar, or typing / Enter while it has focus). Enter emits `search`; Escape or the back button closes the view.
  * - `view`: 'docked' opens below the bar on wide layouts (bar and results as separate
  *   surfaces, 2dp apart); 'fullscreen' covers the window (use on small screens).
@@ -33,7 +33,7 @@ const props = withDefaults(
 )
 
 const query = defineModel<string>({ default: '' })
-const active = defineModel<boolean>('active', { default: false })
+const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ search: [query: string] }>()
 
 const resultsId = useId()
@@ -46,7 +46,7 @@ const input = useTemplateRef<HTMLInputElement>('input')
 const rect = ref({ top: 0, left: 0, width: 360 })
 const docked = computed(() => props.view === 'docked')
 
-const { onCancel, onClose } = useDialog(dialog, active, {
+const { onCancel, onClose } = useDialog(dialog, open, {
   enter: async () => {
     if (docked.value && bar.value) {
       const r = bar.value.getBoundingClientRect()
@@ -72,7 +72,7 @@ const { onCancel, onClose } = useDialog(dialog, active, {
 })
 
 function activate() {
-  active.value = true
+  open.value = true
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -106,7 +106,7 @@ function onKeydown(e: KeyboardEvent) {
       :aria-label="placeholder"
       readonly
       aria-haspopup="dialog"
-      :aria-expanded="active"
+      :aria-expanded="open"
       class="min-w-0 flex-1 cursor-text truncate bg-transparent text-body-large text-on-surface outline-none placeholder:text-on-surface-variant"
       @keydown.enter.prevent="activate"
       @keydown.space.prevent="activate"
@@ -123,7 +123,7 @@ function onKeydown(e: KeyboardEvent) {
     class="fixed inset-0 m-0 size-full max-h-none max-w-none overflow-hidden bg-transparent p-0 text-on-surface backdrop:bg-transparent"
     @cancel="onCancel"
     @close="onClose"
-    @click.self="active = false"
+    @click.self="open = false"
   >
     <div
       ref="panel"
@@ -140,7 +140,7 @@ function onKeydown(e: KeyboardEvent) {
           docked ? 'shadow-elevation-3' : 'mx-3 mt-2',
         ]"
       >
-        <IconButton variant="standard" :label="backLabel" @click="active = false">
+        <IconButton variant="standard" :label="backLabel" @click="open = false">
           <svg viewBox="0 -960 960 960" fill="currentColor"><path :d="iconPaths.arrowBack" /></svg>
         </IconButton>
         <input
@@ -153,7 +153,7 @@ function onKeydown(e: KeyboardEvent) {
           enterkeyhint="search"
           class="min-w-0 flex-1 bg-transparent text-body-large text-on-surface caret-primary outline-none placeholder:text-on-surface-variant [&::-webkit-search-cancel-button]:hidden"
           @keydown="onKeydown"
-          @keydown.esc.prevent="active = false"
+          @keydown.esc.prevent="open = false"
         />
         <IconButton v-if="query" variant="standard" :label="clearLabel" @click="(query = ''), input?.focus()">
           <svg viewBox="0 -960 960 960" fill="currentColor"><path :d="iconPaths.close" /></svg>
@@ -167,7 +167,7 @@ function onKeydown(e: KeyboardEvent) {
           docked ? 'rounded-[12px] bg-surface-container-high py-2 shadow-elevation-3' : 'mt-2 px-3 pb-3',
         ]"
       >
-        <slot :query="query" :close="() => (active = false)" />
+        <slot :query="query" :close="() => (open = false)" />
       </div>
     </div>
   </dialog>
