@@ -249,11 +249,14 @@ const hasIcon = computed(() => !!slots.icon && !props.fullscreen)
         ref="panel"
         :class="[
           'pointer-events-auto relative flex max-h-[min(560px,100%)] min-h-[140px] w-fit max-w-[min(560px,100%)] min-w-[280px] flex-col',
-          'rounded-[28px] shadow-elevation-3',
+          'rounded-[28px]',
         ]"
       >
-        <!-- Container: surface-container-high, extra-large corners. Grows separately from the contents. -->
-        <div ref="surface" class="absolute inset-x-0 top-0 h-full rounded-[inherit] bg-surface-container-high" />
+        <!--
+          Container: surface-container-high, extra-large corners, elevation 3. Grows separately
+          from the contents; the shadow lives here so it grows and fades with the container.
+        -->
+        <div ref="surface" class="absolute inset-x-0 top-0 h-full rounded-[inherit] bg-surface-container-high shadow-elevation-3" />
 
         <div v-if="hasIcon || hasHeadline" ref="top" class="relative flex flex-col">
           <!-- Icon: 24dp secondary, centred -->
