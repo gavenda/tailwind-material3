@@ -82,10 +82,20 @@ function layerFor(host: HTMLElement) {
       color: 'var(--ripple-color)',
       pointerEvents: 'none',
     })
+    // A size container, so waves can size themselves from it (see LIVE_RADIUS).
+    if (LIVE_RADIUS) layer.style.containerType = 'size'
     host.append(layer)
   }
   return layer
 }
+
+/**
+ * The wave's end radius in CSS, from the layer's live size. The element can change
+ * size while held (a pressed button in a standard group widens), and the wave keeps
+ * covering it. Falls back to the size measured at press time.
+ */
+const RADIUS_CSS = `calc(hypot(100cqw, 100cqh) / 2 + ${END_PADDING}px)`
+const LIVE_RADIUS = typeof CSS !== 'undefined' && CSS.supports('width', RADIUS_CSS)
 
 function press(el: HTMLElement, state: State, point?: { x: number; y: number }) {
   release(el, state)
@@ -103,12 +113,15 @@ function press(el: HTMLElement, state: State, point?: { x: number; y: number }) 
   const dy = point ? point.y - rect.top - h / 2 : 0
 
   const circle = document.createElement('span')
+  // Centered on the layer and sized from it, so it follows the layer if that resizes.
+  const r = LIVE_RADIUS ? 'var(--ripple-radius)' : `${end}px`
+  if (LIVE_RADIUS) circle.style.setProperty('--ripple-radius', RADIUS_CSS)
   Object.assign(circle.style, {
     position: 'absolute',
-    left: `${w / 2 - end}px`,
-    top: `${h / 2 - end}px`,
-    width: `${end * 2}px`,
-    height: `${end * 2}px`,
+    left: `calc(50% - ${r})`,
+    top: `calc(50% - ${r})`,
+    width: `calc(${r} * 2)`,
+    height: `calc(${r} * 2)`,
     borderRadius: '50%',
     background: 'currentColor',
     opacity: '0',
