@@ -61,10 +61,9 @@ class Tween {
   private from: number
   private to: number
   private start = 0
-  constructor(
-    value: number,
-    private duration: number,
-  ) {
+  private duration: number
+  constructor(value: number, duration: number) {
+    this.duration = duration
     this.from = value
     this.to = value
   }

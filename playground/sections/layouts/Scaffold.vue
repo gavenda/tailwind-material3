@@ -10,7 +10,6 @@
 import { computed, ref, watch } from 'vue'
 import { Fab, NavigationBar, NavigationItem, NavigationRail, NavigationRailMenuButton } from '../../../src'
 import Icon from '../../Icon.vue'
-import { icons } from '../../icons'
 import { atLeast, type SizeClass } from './sizeClass'
 
 export interface Destination {
