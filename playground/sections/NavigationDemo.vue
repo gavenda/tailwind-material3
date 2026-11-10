@@ -43,7 +43,7 @@ const modal = ref(false)
       <NavigationRail v-model="rail" v-model:expanded="expanded" :modal="modal" label="Sections">
         <template #header="{ expanded: isExpanded, toggle }">
           <IconButton variant="standard" :label="isExpanded ? 'Collapse' : 'Expand'" @click="toggle">
-            <Icon :svg="isExpanded ? icons.close : icons.menu" />
+            <Icon :svg="isExpanded ? icons.menuOpen : icons.menu" />
           </IconButton>
           <Fab color="tertiary-container" :expanded="isExpanded" lowered>
             <template #icon><Icon :svg="icons.edit" /></template>
