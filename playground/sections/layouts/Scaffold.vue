@@ -8,7 +8,7 @@
  * https://m3.material.io/foundations/layout/applying-layout/window-size-classes
  */
 import { computed, ref, watch } from 'vue'
-import { Fab, IconButton, NavigationBar, NavigationItem, NavigationRail } from '../../../src'
+import { Fab, NavigationBar, NavigationItem, NavigationRail, NavigationRailMenuButton } from '../../../src'
 import Icon from '../../Icon.vue'
 import { icons } from '../../icons'
 import { atLeast, type SizeClass } from './sizeClass'
@@ -45,10 +45,8 @@ watch(roomy, (v) => (expanded.value = v))
       :modal="!roomy"
       label="Main"
     >
-      <template #header="{ expanded: isExpanded, toggle }">
-        <IconButton variant="standard" :label="isExpanded ? 'Collapse navigation' : 'Expand navigation'" @click="toggle">
-          <Icon :svg="isExpanded ? icons.menuOpen : icons.menu" />
-        </IconButton>
+      <template #header="{ expanded: isExpanded }">
+        <NavigationRailMenuButton />
         <Fab v-if="fab" color="tertiary-container" :label="fab.label" :expanded="isExpanded" lowered>
           <template #icon><Icon :svg="fab.icon" /></template>
           {{ fab.label }}

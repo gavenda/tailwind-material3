@@ -30,7 +30,6 @@ import home from '@material-symbols/svg-400/outlined/home.svg?raw'
 import homeFill from '@material-symbols/svg-400/outlined/home-fill.svg?raw'
 import search from '@material-symbols/svg-400/outlined/search.svg?raw'
 import menu from '@material-symbols/svg-400/outlined/menu.svg?raw'
-import menuOpen from '@material-symbols/svg-400/outlined/menu_open.svg?raw'
 import moreVert from '@material-symbols/svg-400/outlined/more_vert.svg?raw'
 import arrowBack from '@material-symbols/svg-400/outlined/arrow_back.svg?raw'
 import close from '@material-symbols/svg-400/outlined/close.svg?raw'
@@ -112,7 +111,6 @@ export const icons = {
   homeFill,
   search,
   menu,
-  menuOpen,
   moreVert,
   arrowBack,
   close,

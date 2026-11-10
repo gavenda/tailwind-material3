@@ -1,4 +1,5 @@
 export { default as NavigationBar } from './NavigationBar.vue'
 export { default as NavigationRail } from './NavigationRail.vue'
 export { default as NavigationItem } from './NavigationItem.vue'
+export { default as NavigationRailMenuButton } from './NavigationRailMenuButton.vue'
 export type { NavValue } from './context'

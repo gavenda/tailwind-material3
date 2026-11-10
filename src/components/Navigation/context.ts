@@ -11,6 +11,8 @@ export interface NavContext {
   readonly expanded: boolean
   isActive(value: NavValue | undefined): boolean
   select(value: NavValue | undefined): void
+  /** Rail only: expand or collapse it (NavigationRailMenuButton uses this). */
+  toggle?(): void
 }
 
 export const navKey: InjectionKey<NavContext> = Symbol('Navigation')
