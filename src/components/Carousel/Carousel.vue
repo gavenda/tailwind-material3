@@ -4,7 +4,8 @@
  * Spec: https://m3.material.io/components/carousel/specs
  * Tokens: md.comp.carousel-item
  *
- * Put one element per item in the default slot (usually an <img> or a CarouselItem).
+ * Put one element per item in the default slot (usually an <img>, or a button or link
+ * wrapping one). Clickable items should bring their own state layer and `v-ripple`.
  * Items get 28dp corners and sit 8dp apart.
  * - multi-browse: large items, then a medium and a small one at the end. Items shrink as
  *   they scroll toward the edges; their content is masked (cropped), not squashed.

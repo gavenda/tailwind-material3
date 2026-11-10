@@ -15,6 +15,7 @@
 import { onBeforeUnmount, watch } from 'vue'
 import { focusRingTight, stateLayer } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -95,6 +96,7 @@ function onAction() {
         <div :class="['flex shrink-0 items-center', longAction ? 'justify-end' : 'ms-2']">
           <button
             v-if="actionLabel"
+            v-ripple
             type="button"
             :class="[
               'relative inline-flex h-10 cursor-pointer items-center rounded-full px-3 text-label-large text-inverse-primary',
@@ -107,13 +109,14 @@ function onAction() {
           </button>
           <button
             v-if="closable"
+            v-ripple
             type="button"
             :aria-label="closeLabel"
             :class="[
               'relative inline-flex size-12 cursor-pointer items-center justify-center rounded-full text-inverse-on-surface',
               'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:-outline-offset-4 focus-visible:outline-secondary',
               'before:pointer-events-none before:absolute before:inset-1 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-              'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+              'hover:before:opacity-8 focus-visible:before:opacity-10 [--ripple-inset:4px]',
             ]"
             @click="open = false"
           >

@@ -14,6 +14,7 @@
  */
 import { computed, useSlots } from 'vue'
 import { focusRing, stateLayer } from '../../internal/classes'
+import { vRipple } from '../../internal/ripple'
 
 export type FabSize = 'small' | 'medium' | 'large'
 export type FabColor =
@@ -80,13 +81,14 @@ const spec = computed(() => sizes[props.size])
 // Elevation 3, hover 4; lowered: 1, hover 2. Focus and pressed return to resting.
 const elevation = computed(() =>
   props.lowered
-    ? 'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 active:shadow-elevation-1'
-    : 'shadow-elevation-3 hover:shadow-elevation-4 focus-visible:shadow-elevation-3 active:shadow-elevation-3',
+    ? 'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 data-pressed:shadow-elevation-1'
+    : 'shadow-elevation-3 hover:shadow-elevation-4 focus-visible:shadow-elevation-3 data-pressed:shadow-elevation-3',
 )
 </script>
 
 <template>
   <button
+    v-ripple
     :type="type"
     :disabled="disabled"
     :aria-label="extended ? undefined : label"

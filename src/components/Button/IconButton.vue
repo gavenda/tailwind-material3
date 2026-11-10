@@ -14,6 +14,7 @@ import type { ButtonValue } from '../ButtonGroup/context'
 import type { ButtonShape, ButtonSize } from './types'
 import { toolbarButtonColors, toolbarKey } from '../Toolbar/context'
 import { buttonBaseClasses, useButton } from './useButton'
+import { vRipple } from '../../internal/ripple'
 
 export type IconButtonVariant = 'filled' | 'tonal' | 'outlined' | 'standard'
 export type IconButtonWidth = 'narrow' | 'default' | 'wide'
@@ -69,31 +70,31 @@ const sizes: Record<ButtonSize, SizeSpec> = {
     height: 'h-8',
     icon: 'size-5',
     widths: { narrow: 'w-7', default: 'w-8', wide: 'w-10' },
-    outline: 'border before:-inset-px',
+    outline: 'border before:-inset-px [--ripple-inset:-1px]',
   },
   s: {
     height: 'h-10',
     icon: 'size-6',
     widths: { narrow: 'w-8', default: 'w-10', wide: 'w-13' },
-    outline: 'border before:-inset-px',
+    outline: 'border before:-inset-px [--ripple-inset:-1px]',
   },
   m: {
     height: 'h-14',
     icon: 'size-6',
     widths: { narrow: 'w-12', default: 'w-14', wide: 'w-18' },
-    outline: 'border before:-inset-px',
+    outline: 'border before:-inset-px [--ripple-inset:-1px]',
   },
   l: {
     height: 'h-24',
     icon: 'size-8',
     widths: { narrow: 'w-16', default: 'w-24', wide: 'w-32' },
-    outline: 'border-2 before:-inset-0.5',
+    outline: 'border-2 before:-inset-0.5 [--ripple-inset:-2px]',
   },
   xl: {
     height: 'h-34',
     icon: 'size-10',
     widths: { narrow: 'w-26', default: 'w-34', wide: 'w-46' },
-    outline: 'border-3 before:-inset-[3px]',
+    outline: 'border-3 before:-inset-[3px] [--ripple-inset:-3px]',
   },
 }
 
@@ -152,6 +153,7 @@ const classes = computed(() => {
 <template>
   <button
     ref="root"
+    v-ripple
     :type="type"
     :disabled="disabled"
     :aria-label="label"

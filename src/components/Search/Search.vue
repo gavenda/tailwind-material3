@@ -16,6 +16,7 @@ import { iconPaths } from '../../internal/icons'
 import { animate, effects, fadeOut, noOvershoot, spatial } from '../../internal/motion'
 import { useDialog } from '../../internal/useDialog'
 import IconButton from '../Button/IconButton.vue'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -84,11 +85,13 @@ function onKeydown(e: KeyboardEvent) {
   <!-- Bar: 56dp pill, surface-container-high, search icon, input, trailing actions -->
   <div
     ref="bar"
+    v-ripple
     role="search"
     :class="[
       'relative flex h-14 w-full max-w-180 min-w-0 cursor-text items-center gap-1 rounded-full bg-surface-container-high ps-1 font-plain',
       $slots.trailing ? 'pe-1' : 'pe-4',
-      'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-on-surface before:opacity-0 before:transition-opacity hover:before:opacity-8',
+      // State layer and pressed ripple in on-surface: hover 8%, pressed 10%
+      'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-on-surface before:opacity-0 before:transition-opacity hover:before:opacity-8 [--ripple-color:var(--color-on-surface)]',
     ]"
     @click="activate"
   >

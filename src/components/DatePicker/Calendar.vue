@@ -9,6 +9,7 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { focusRingTight, stateLayer } from '../../internal/classes'
 import { addDays, addMonths, firstDayOfWeek, inRange, monthGrid, sameDay, sameMonth, startOfDay } from './dates'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -145,6 +146,7 @@ const size = computed(() => (props.cell === 'l' ? 'size-12' : 'size-10'))
           ]"
         />
         <button
+          v-ripple
           v-if="sameMonth(d, month)"
           type="button"
           :tabindex="sameDay(d, focusDay) ? 0 : -1"

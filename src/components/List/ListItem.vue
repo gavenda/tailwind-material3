@@ -15,6 +15,7 @@
 import { computed, inject, useSlots, type Component } from 'vue'
 import { focusRingInset, stateLayer } from '../../internal/classes'
 import { listKey } from './context'
+import { vRipple } from '../../internal/ripple'
 
 defineOptions({ inheritAttrs: false })
 
@@ -77,6 +78,7 @@ const muted = computed(() => (props.selected ? 'text-on-secondary-container' : '
   <div role="listitem" class="contents">
   <component
     :is="as"
+    v-ripple="isInteractive"
     v-bind="$attrs"
     :type="isNativeButton ? 'button' : undefined"
     :disabled="isNativeButton ? disabled : undefined"

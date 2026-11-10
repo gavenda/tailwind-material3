@@ -13,6 +13,7 @@ import { focusRingInset, stateLayer } from '../../internal/classes'
 import Badge from '../Badge/Badge.vue'
 import { useBadge, type BadgeProp } from '../Badge/useBadge'
 import { tabsKey, type TabValue } from './context'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -43,6 +44,7 @@ const { hasBadge, badgeValue } = useBadge(() => props.badge)
 
 <template>
   <button
+    v-ripple
     type="button"
     role="tab"
     :aria-selected="active"

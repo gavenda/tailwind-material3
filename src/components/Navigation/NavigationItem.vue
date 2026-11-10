@@ -8,10 +8,11 @@
  * - `badge`: true for a small badge, or a number/string for a large one.
  * - `as`/`href` render a link (RouterLink, 'a') instead of a button.
  */
-import { computed, inject, type Component } from 'vue'
+import { computed, inject, useTemplateRef, type Component } from 'vue'
 import Badge from '../Badge/Badge.vue'
 import { useBadge, type BadgeProp } from '../Badge/useBadge'
 import { navKey, type NavValue } from './context'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -39,6 +40,10 @@ const horizontal = computed(() => nav?.layout === 'horizontal')
 const rail = computed(() => nav?.container === 'rail')
 const element = computed(() => props.as ?? 'button')
 
+// The ripple is drawn in the indicator pill, like the state layer.
+const indicator = useTemplateRef<HTMLElement>('indicator')
+const ripple = { host: () => indicator.value }
+
 function onClick(e: MouseEvent) {
   nav?.select(props.value)
   emit('click', e)
@@ -50,6 +55,7 @@ const { hasBadge, badgeValue } = useBadge(() => props.badge)
 <template>
   <component
     :is="element"
+    v-ripple="ripple"
     :type="element === 'button' ? 'button' : undefined"
     :disabled="element === 'button' ? disabled : undefined"
     :aria-current="isActive ? 'page' : undefined"
@@ -67,14 +73,15 @@ const { hasBadge, badgeValue } = useBadge(() => props.badge)
     <!--
       Active indicator: secondary-container pill. Vertical: 56×32 around the icon.
       Horizontal: wraps icon and label (bar 40dp tall, rail 56dp and full width).
-      It also carries the state layer and the focus ring.
+      It also carries the state layer, the ripple and the focus ring.
     -->
     <span
+      ref="indicator"
       :class="[
         'relative flex items-center justify-center rounded-full',
         'group-focus-visible:outline-3 group-focus-visible:outline-solid group-focus-visible:outline-secondary',
         'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-        'group-hover:before:opacity-8 group-focus-visible:before:opacity-10 group-active:before:opacity-10',
+        'group-hover:before:opacity-8 group-focus-visible:before:opacity-10',
         horizontal ? (rail ? 'h-14 w-full justify-start gap-2 px-4' : 'h-10 gap-1 px-4') : 'h-8 w-14',
         isActive ? 'text-on-secondary-container' : 'text-on-surface-variant',
       ]"

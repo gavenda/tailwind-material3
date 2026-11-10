@@ -13,6 +13,7 @@
  * Attributes such as name, id and required go to the input; class and style to the root.
  */
 import { computed, nextTick, useAttrs, useTemplateRef } from 'vue'
+import { vRipple } from '../../internal/ripple'
 
 defineOptions({ inheritAttrs: false })
 
@@ -37,6 +38,8 @@ const inputAttrs = computed(() => {
 })
 
 const input = useTemplateRef<HTMLInputElement>('input')
+const rippleHost = useTemplateRef<HTMLElement>('rippleHost')
+const ripple = { host: () => rippleHost.value }
 
 function onChange(e: Event) {
   model.value = (e.target as HTMLInputElement).checked
@@ -59,35 +62,39 @@ const look = computed(() => {
           handle: 'bg-surface',
           icon: 'text-on-surface/38',
           layer: '',
+          ripple: '',
         }
       : {
           track: 'bg-surface-container-highest/12 border-on-surface/12',
           handle: 'bg-on-surface/38',
           icon: 'text-surface-container-highest/38',
           layer: '',
+          ripple: '',
         }
   }
   return on
     ? {
         track: 'bg-primary border-primary',
         handle:
-          'bg-on-primary peer-hover:bg-primary-container peer-focus-visible:bg-primary-container peer-active:bg-primary-container',
+          'bg-on-primary peer-hover:bg-primary-container peer-focus-visible:bg-primary-container peer-data-pressed:bg-primary-container',
         icon: 'text-primary',
         layer: 'bg-primary',
+        ripple: 'text-primary',
       }
     : {
         track: 'bg-surface-container-highest border-outline',
         handle:
-          'bg-outline peer-hover:bg-on-surface-variant peer-focus-visible:bg-on-surface-variant peer-active:bg-on-surface-variant',
+          'bg-outline peer-hover:bg-on-surface-variant peer-focus-visible:bg-on-surface-variant peer-data-pressed:bg-on-surface-variant',
         icon: 'text-surface-container-highest',
         layer: 'bg-on-surface',
+        ripple: 'text-on-surface',
       }
 })
 
 // Handle: 16dp off, 24dp on or with an icon, 28dp while pressed.
 const handleSize = computed(() => {
   const base = model.value || showUnselectedIcon.value ? 'size-6' : 'size-4'
-  return props.disabled ? base : `${base} peer-active:size-7`
+  return props.disabled ? base : `${base} peer-data-pressed:size-7`
 })
 
 // Handle and state layer are centred 16dp from either end of the 52dp track.
@@ -113,6 +120,7 @@ const position = computed(() =>
     <span class="relative inline-flex h-12 w-13 shrink-0">
       <input
         ref="input"
+        v-ripple="ripple"
         v-bind="inputAttrs"
         type="checkbox"
         role="switch"
@@ -133,15 +141,26 @@ const position = computed(() =>
         ]"
       />
 
-      <!-- State layer: 40dp circle around the handle; hover 8%, focus/pressed 10% -->
+      <!-- State layer: 40dp circle around the handle; hover 8%, focus 10% -->
       <span
         v-if="!disabled"
         :class="[
           'pointer-events-none absolute top-1/2 left-4 size-10 -translate-y-1/2 rounded-full opacity-0',
-          'peer-hover:opacity-8 peer-focus-visible:opacity-10 peer-active:opacity-10',
+          'peer-hover:opacity-8 peer-focus-visible:opacity-10',
           '[transition:translate_var(--duration-spring-fast-spatial)_var(--ease-spring-fast-spatial),opacity_var(--duration-effects-fast)_var(--ease-effects-fast),background-color_var(--duration-effects-fast)_var(--ease-effects-fast)] motion-reduce:transition-none',
           position,
           look.layer,
+        ]"
+      />
+      <!-- Pressed: a ripple in the same circle, following the handle -->
+      <span
+        v-if="!disabled"
+        ref="rippleHost"
+        :class="[
+          'pointer-events-none absolute top-1/2 left-4 size-10 -translate-y-1/2 rounded-full',
+          '[transition:translate_var(--duration-spring-fast-spatial)_var(--ease-spring-fast-spatial)] motion-reduce:transition-none',
+          position,
+          look.ripple,
         ]"
       />
 

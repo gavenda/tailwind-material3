@@ -7,6 +7,7 @@
 import { computed, inject } from 'vue'
 import { focusRing, stateLayer } from '../../internal/classes'
 import { fabMenuKey } from './context'
+import { vRipple } from '../../internal/ripple'
 
 const menu = inject(fabMenuKey, null)
 
@@ -20,6 +21,7 @@ const color = computed(() => colors[menu?.color ?? 'primary'])
 
 <template>
   <button
+    v-ripple
     type="button"
     role="menuitem"
     tabindex="-1"

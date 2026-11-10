@@ -13,12 +13,13 @@ export const focusRingTight =
   'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-secondary'
 
 /**
- * State layer in the current text color on ::before: hover 8%, focus 10%, pressed 10%.
+ * State layer in the current text color on ::before: hover 8%, focus 10%.
+ * The pressed state is a ripple: add `v-ripple` (internal/ripple.ts) to the element.
  * The element must be `relative` (and clip or round its own corners).
  */
 export const stateLayer = [
   'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-  'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+  'hover:before:opacity-8 focus-visible:before:opacity-10',
 ].join(' ')
 
 /** Invisible 48dp touch target on ::after, centred on the element. */

@@ -30,10 +30,10 @@ export const shapeTokens: Record<ButtonSize, ShapeSpec> = {
 /** Classes every button container shares. Corners come from the CSS variables in `corners`. */
 export const buttonBaseClasses = [
   'relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap select-none shape-morph',
-  'rounded-s-(--corner-s) rounded-e-(--corner-e) active:rounded-s-(--corner-s-pressed) active:rounded-e-(--corner-e-pressed)',
+  'rounded-s-(--corner-s) rounded-e-(--corner-e) data-pressed:rounded-s-(--corner-s-pressed) data-pressed:rounded-e-(--corner-e-pressed)',
   focusRing,
   stateLayer,
-  // Disabled: content on-surface @ 38%, no elevation or state layer
+  // Disabled: content on-surface @ 38%, no elevation, state layer or ripple
   'disabled:pointer-events-none disabled:text-on-surface/38 disabled:shadow-none',
 ]
 

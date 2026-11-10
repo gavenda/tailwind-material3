@@ -7,6 +7,7 @@
  * Space cards at most 8dp apart (layout is up to the parent).
  */
 import { computed, type Component } from 'vue'
+import { vRipple } from '../../internal/ripple'
 
 export type CardVariant = 'elevated' | 'filled' | 'outlined'
 
@@ -47,13 +48,13 @@ interface VariantSpec {
 const variants: Record<CardVariant, VariantSpec> = {
   elevated: {
     container: 'bg-surface-container-low shadow-elevation-1',
-    states: 'hover:shadow-elevation-2 focus-visible:shadow-elevation-1 active:shadow-elevation-1',
+    states: 'hover:shadow-elevation-2 focus-visible:shadow-elevation-1 data-pressed:shadow-elevation-1',
     dragged: 'data-dragged:shadow-elevation-4',
     disabled: 'aria-disabled:bg-linear-to-r aria-disabled:from-surface/38 aria-disabled:to-surface/38',
   },
   filled: {
     container: 'bg-surface-container-highest',
-    states: 'hover:shadow-elevation-1 focus-visible:shadow-none active:shadow-none',
+    states: 'hover:shadow-elevation-1 focus-visible:shadow-none data-pressed:shadow-none',
     dragged: 'data-dragged:shadow-elevation-3',
     disabled:
       'aria-disabled:bg-linear-to-r aria-disabled:from-on-surface/38 aria-disabled:to-on-surface/38',
@@ -61,7 +62,7 @@ const variants: Record<CardVariant, VariantSpec> = {
   outlined: {
     container: 'border border-outline-variant bg-surface',
     states:
-      'hover:shadow-elevation-1 focus-visible:border-on-surface focus-visible:shadow-none active:shadow-none',
+      'hover:shadow-elevation-1 focus-visible:border-on-surface focus-visible:shadow-none data-pressed:shadow-none',
     dragged: 'data-dragged:shadow-elevation-3',
     disabled: 'aria-disabled:border-outline/12',
   },
@@ -82,8 +83,8 @@ const classes = computed(() => {
       'cursor-pointer',
       // Focus indicator: 3dp secondary, 2dp outer offset
       'focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
-      // State layer: on-surface at hover 8%, focus 10%, pressed 10%
-      'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+      // State layer: on-surface at hover 8%, focus 10%; pressed is the ripple
+      'hover:before:opacity-8 focus-visible:before:opacity-10',
       !props.dragged && v.states,
     ],
   ]
@@ -93,6 +94,7 @@ const classes = computed(() => {
 <template>
   <component
     :is="as"
+    v-ripple="interactive && !dragged"
     :type="isNativeButton ? 'button' : undefined"
     :disabled="isNativeButton ? disabled : undefined"
     :aria-disabled="disabled || undefined"

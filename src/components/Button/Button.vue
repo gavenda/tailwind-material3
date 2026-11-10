@@ -13,6 +13,7 @@ import { touchTarget } from '../../internal/classes'
 import type { ButtonValue } from '../ButtonGroup/context'
 import type { ButtonShape, ButtonSize, ButtonVariant } from './types'
 import { buttonBaseClasses, useButton } from './useButton'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -63,18 +64,18 @@ interface SizeSpec {
 }
 
 const sizes: Record<ButtonSize, SizeSpec> = {
-  xs: { container: 'h-8 px-3 gap-1 font-plain text-label-large', icon: 'size-5', outline: 'border before:-inset-px' },
-  s: { container: 'h-10 px-4 gap-2 font-plain text-label-large', icon: 'size-5', outline: 'border before:-inset-px' },
-  m: { container: 'h-14 px-6 gap-2 font-plain text-title-medium', icon: 'size-6', outline: 'border before:-inset-px' },
+  xs: { container: 'h-8 px-3 gap-1 font-plain text-label-large', icon: 'size-5', outline: 'border before:-inset-px [--ripple-inset:-1px]' },
+  s: { container: 'h-10 px-4 gap-2 font-plain text-label-large', icon: 'size-5', outline: 'border before:-inset-px [--ripple-inset:-1px]' },
+  m: { container: 'h-14 px-6 gap-2 font-plain text-title-medium', icon: 'size-6', outline: 'border before:-inset-px [--ripple-inset:-1px]' },
   l: {
     container: 'h-24 px-12 gap-3 font-brand text-headline-small',
     icon: 'size-8',
-    outline: 'border-2 before:-inset-0.5',
+    outline: 'border-2 before:-inset-0.5 [--ripple-inset:-2px]',
   },
   xl: {
     container: 'h-34 px-16 gap-4 font-brand text-headline-large',
     icon: 'size-10',
-    outline: 'border-3 before:-inset-[3px]',
+    outline: 'border-3 before:-inset-[3px] [--ripple-inset:-3px]',
   },
 }
 
@@ -110,9 +111,9 @@ const colors: Record<ButtonVariant, Record<ColorState, string>> = {
 
 const elevations: Record<ButtonVariant, string> = {
   elevated:
-    'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 active:shadow-elevation-1',
-  filled: 'hover:shadow-elevation-1 focus-visible:shadow-none active:shadow-none',
-  tonal: 'hover:shadow-elevation-1 focus-visible:shadow-none active:shadow-none',
+    'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 data-pressed:shadow-elevation-1',
+  filled: 'hover:shadow-elevation-1 focus-visible:shadow-none data-pressed:shadow-none',
+  tonal: 'hover:shadow-elevation-1 focus-visible:shadow-none data-pressed:shadow-none',
   outlined: '',
   text: '',
 }
@@ -143,6 +144,7 @@ const classes = computed(() => {
 <template>
   <button
     ref="root"
+    v-ripple
     :type="type"
     :disabled="disabled"
     :aria-pressed="isToggle ? isSelected : undefined"

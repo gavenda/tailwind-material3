@@ -12,6 +12,7 @@
  * Attributes such as name, id and required go to the input; class and style to the root.
  */
 import { computed, nextTick, useAttrs, useTemplateRef } from 'vue'
+import { vRipple } from '../../internal/ripple'
 
 defineOptions({ inheritAttrs: false })
 
@@ -36,6 +37,8 @@ const inputAttrs = computed(() => {
 })
 
 const input = useTemplateRef<HTMLInputElement>('input')
+const rippleHost = useTemplateRef<HTMLElement>('rippleHost')
+const ripple = { host: () => rippleHost.value }
 const checked = computed(() => model.value === props.value)
 
 function onChange() {
@@ -48,12 +51,14 @@ function onChange() {
 
 // One place picks every color, so no two classes for the same property apply together.
 const look = computed(() => {
-  if (props.disabled) return { icon: 'text-on-surface/38', layer: '' }
+  if (props.disabled) return { icon: 'text-on-surface/38', layer: '', ripple: '' }
   return checked.value
-    ? { icon: 'text-primary', layer: 'bg-primary peer-active:bg-on-surface' }
+    ? { icon: 'text-primary', layer: 'bg-primary', ripple: 'text-on-surface' }
     : {
-        icon: 'text-on-surface-variant peer-hover:text-on-surface peer-focus-visible:text-on-surface peer-active:text-on-surface',
-        layer: 'bg-on-surface peer-active:bg-primary',
+        icon: 'text-on-surface-variant peer-hover:text-on-surface peer-focus-visible:text-on-surface peer-data-pressed:text-on-surface',
+        layer: 'bg-on-surface',
+        // The pressed ripple shows the state it's about to become.
+        ripple: 'text-primary',
       }
 })
 </script>
@@ -70,6 +75,7 @@ const look = computed(() => {
     <span class="relative inline-flex size-12 shrink-0 items-center justify-center">
       <input
         ref="input"
+        v-ripple="ripple"
         v-bind="inputAttrs"
         type="radio"
         :checked="checked"
@@ -78,15 +84,17 @@ const look = computed(() => {
         @change="onChange"
       />
 
-      <!-- State layer: 40dp circle; hover 8%, focus/pressed 10%. Pressed shows the state it's about to become. -->
+      <!-- State layer: 40dp circle; hover 8%, focus 10% -->
       <span
         v-if="!disabled"
         :class="[
           'pointer-events-none absolute size-10 rounded-full opacity-0 transition-opacity',
-          'peer-hover:opacity-8 peer-focus-visible:opacity-10 peer-active:opacity-10',
+          'peer-hover:opacity-8 peer-focus-visible:opacity-10',
           look.layer,
         ]"
       />
+      <!-- Pressed: a ripple in the same circle, in the color it's about to become -->
+      <span v-if="!disabled" ref="rippleHost" :class="['pointer-events-none absolute size-10 rounded-full', look.ripple]" />
 
       <!--
         Icon: 20dp ring with a 2dp stroke, and a 10dp dot that springs in (fast spatial).

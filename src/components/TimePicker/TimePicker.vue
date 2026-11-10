@@ -21,6 +21,7 @@ import { useDialog } from '../../internal/useDialog'
 import Button from '../Button/Button.vue'
 import IconButton from '../Button/IconButton.vue'
 import { timePickerLabels, type TimePickerLabels } from './labels'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -304,11 +305,11 @@ const selectorBox = (active: boolean) => [
               </label>
             </template>
             <template v-else>
-              <button type="button" :aria-label="strings.hour" :aria-pressed="part === 'hour'" :class="[selectorBox(part === 'hour'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'hour'">
+              <button v-ripple type="button" :aria-label="strings.hour" :aria-pressed="part === 'hour'" :class="[selectorBox(part === 'hour'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'hour'">
                 {{ use12 ? displayHour : pad(displayHour) }}
               </button>
               <span class="w-6 text-center font-brand text-display-large text-on-surface">:</span>
-              <button type="button" :aria-label="strings.minute" :aria-pressed="part === 'minute'" :class="[selectorBox(part === 'minute'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'minute'">
+              <button v-ripple type="button" :aria-label="strings.minute" :aria-pressed="part === 'minute'" :class="[selectorBox(part === 'minute'), 'cursor-pointer', focusRing, stateLayer]" @click="part = 'minute'">
                 {{ pad(minutes) }}
               </button>
             </template>
@@ -322,6 +323,7 @@ const selectorBox = (active: boolean) => [
             class="flex h-20 w-13 flex-col overflow-hidden rounded-[8px] border border-outline text-title-medium"
           >
             <button
+              v-ripple
               v-for="isPm in [false, true]"
               :key="String(isPm)"
               type="button"

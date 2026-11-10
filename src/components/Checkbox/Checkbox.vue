@@ -12,6 +12,7 @@
  * Attributes such as name, id and required go to the input; class and style to the root.
  */
 import { computed, nextTick, useAttrs, useTemplateRef, watchEffect } from 'vue'
+import { vRipple } from '../../internal/ripple'
 
 defineOptions({ inheritAttrs: false })
 
@@ -40,6 +41,8 @@ const inputAttrs = computed(() => {
 })
 
 const input = useTemplateRef<HTMLInputElement>('input')
+const rippleHost = useTemplateRef<HTMLElement>('rippleHost')
+const ripple = { host: () => rippleHost.value }
 
 const checked = computed(() =>
   Array.isArray(model.value) ? model.value.includes(props.value) : model.value,
@@ -79,6 +82,7 @@ const look = computed(() => {
       fill: 'bg-on-surface/38',
       mark: 'text-surface',
       layer: '',
+      ripple: '',
     }
   }
   if (props.error) {
@@ -87,16 +91,18 @@ const look = computed(() => {
       fill: 'bg-error',
       mark: 'text-on-error',
       layer: 'bg-error',
+      ripple: 'text-error',
     }
   }
   return {
     outline: sel
       ? 'border-transparent'
-      : 'border-on-surface-variant peer-hover:border-on-surface peer-focus-visible:border-on-surface peer-active:border-on-surface',
+      : 'border-on-surface-variant peer-hover:border-on-surface peer-focus-visible:border-on-surface peer-data-pressed:border-on-surface',
     fill: 'bg-primary',
     mark: 'text-on-primary',
-    // Pressed shows the state it's about to become.
-    layer: sel ? 'bg-primary peer-active:bg-on-surface' : 'bg-on-surface peer-active:bg-primary',
+    layer: sel ? 'bg-primary' : 'bg-on-surface',
+    // The pressed ripple shows the state it's about to become.
+    ripple: sel ? 'text-on-surface' : 'text-primary',
   }
 })
 
@@ -116,6 +122,7 @@ const reveal = (shown: boolean) => (shown ? '[clip-path:inset(0_0_0_0)]' : '[cli
     <span class="relative inline-flex size-12 shrink-0 items-center justify-center">
       <input
         ref="input"
+        v-ripple="ripple"
         v-bind="inputAttrs"
         type="checkbox"
         :checked="checked"
@@ -126,15 +133,17 @@ const reveal = (shown: boolean) => (shown ? '[clip-path:inset(0_0_0_0)]' : '[cli
         @change="onChange"
       />
 
-      <!-- State layer: 40dp circle; hover 8%, focus/pressed 10% -->
+      <!-- State layer: 40dp circle; hover 8%, focus 10% -->
       <span
         v-if="!disabled"
         :class="[
           'pointer-events-none absolute size-10 rounded-full opacity-0 transition-opacity',
-          'peer-hover:opacity-8 peer-focus-visible:opacity-10 peer-active:opacity-10',
+          'peer-hover:opacity-8 peer-focus-visible:opacity-10',
           look.layer,
         ]"
       />
+      <!-- Pressed: a ripple in the same circle -->
+      <span v-if="!disabled" ref="rippleHost" :class="['pointer-events-none absolute size-10 rounded-full', look.ripple]" />
 
       <!-- Container: 18dp, 2dp corners, 2dp outline when unselected -->
       <span

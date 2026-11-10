@@ -13,6 +13,7 @@
  */
 import { computed, useSlots } from 'vue'
 import { focusRing } from '../../internal/classes'
+import { vRipple } from '../../internal/ripple'
 
 defineOptions({ inheritAttrs: false })
 
@@ -77,8 +78,8 @@ const look = computed(() => {
   if (isSelected.value) {
     container = 'border-transparent bg-secondary-container text-on-secondary-container'
     elevation = isElevated.value
-      ? 'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 active:shadow-elevation-1'
-      : 'hover:shadow-elevation-1 focus-visible:shadow-none active:shadow-none'
+      ? 'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 data-pressed:shadow-elevation-1'
+      : 'hover:shadow-elevation-1 focus-visible:shadow-none data-pressed:shadow-none'
     leading = type === 'input' ? 'text-primary' : ''
     trailing = 'text-on-secondary-container'
   } else {
@@ -89,7 +90,7 @@ const look = computed(() => {
       ? `${label} border-transparent bg-surface-container-low`
       : `${label} border-outline-variant ${focusOutline}`
     elevation = isElevated.value
-      ? 'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 active:shadow-elevation-1'
+      ? 'shadow-elevation-1 hover:shadow-elevation-2 focus-visible:shadow-elevation-1 data-pressed:shadow-elevation-1'
       : ''
     leading = type === 'input' ? '' : 'text-primary'
     trailing = 'text-on-surface-variant'
@@ -116,6 +117,7 @@ function onClick() {
   <span class="relative inline-flex">
     <button
       v-bind="$attrs"
+      v-ripple="!dragged"
       type="button"
       :disabled="disabled"
       :aria-pressed="selectable ? isSelected : undefined"
@@ -124,9 +126,10 @@ function onClick() {
         'relative inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg border font-plain text-label-large whitespace-nowrap select-none transition-shadow',
         // Focus indicator: 3dp secondary, 2dp outer offset
         focusRing,
-        // State layer in the label color (covers the outline): hover 8%, focus/pressed 10%, dragged 16%
+        // State layer in the label color (covers the outline): hover 8%, focus 10%, dragged 16%.
+        // Pressed is the ripple, which covers the outline too.
         'before:pointer-events-none before:absolute before:-inset-px before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity',
-        'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10 data-dragged:before:opacity-16',
+        'hover:before:opacity-8 focus-visible:before:opacity-10 data-dragged:before:opacity-16 [--ripple-inset:-1px]',
         // 48dp touch target
         'after:absolute after:inset-x-0 after:top-1/2 after:h-12 after:-translate-y-1/2',
         'disabled:pointer-events-none',
@@ -160,14 +163,15 @@ function onClick() {
 
     <button
       v-if="hasRemove"
+      v-ripple
       type="button"
       :disabled="disabled"
       :aria-label="removeLabel"
       :class="[
-        'absolute end-2 top-1/2 inline-flex size-4.5 -translate-y-1/2 cursor-pointer *:size-full',
-        'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary focus-visible:rounded-full',
+        'absolute end-2 top-1/2 inline-flex size-4.5 -translate-y-1/2 cursor-pointer rounded-full *:size-full',
+        'focus:outline-none focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-secondary',
         'before:pointer-events-none before:absolute before:-inset-1.5 before:rounded-full before:bg-current before:opacity-0 before:transition-opacity',
-        'hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10',
+        'hover:before:opacity-8 focus-visible:before:opacity-10 [--ripple-inset:-6px]',
         // 48dp touch target
         'after:absolute after:top-1/2 after:left-1/2 after:size-12 after:-translate-1/2',
         'disabled:pointer-events-none',

@@ -12,6 +12,7 @@
 import { computed, inject } from 'vue'
 import { focusRingInset, stateLayer } from '../../internal/classes'
 import { menuKey } from './context'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -55,6 +56,7 @@ function onClick() {
 
 <template>
   <button
+    v-ripple
     type="button"
     :role="selected === undefined ? 'menuitem' : 'menuitemcheckbox'"
     :aria-checked="selected === undefined ? undefined : selected"

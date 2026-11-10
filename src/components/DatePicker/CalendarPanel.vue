@@ -11,6 +11,7 @@ import IconButton from '../Button/IconButton.vue'
 import Calendar from './Calendar.vue'
 import { addMonths, startOfMonth } from './dates'
 import { datePickerLabels, type DatePickerLabels } from './labels'
+import { vRipple } from '../../internal/ripple'
 
 const props = withDefaults(
   defineProps<{
@@ -80,6 +81,7 @@ const canNext = computed(() => !props.max || addMonths(month.value, 1) <= props.
     <div class="flex h-14 items-center ps-4 pe-3">
       <!-- Month/year menu button: 40dp pill -->
       <button
+        v-ripple
         type="button"
         :aria-expanded="years"
         :class="[
@@ -112,6 +114,7 @@ const canNext = computed(() => !props.max || addMonths(month.value, 1) <= props.
     <!-- Year list: 72×36dp pills, three per row -->
     <div v-if="years" ref="yearList" :class="['grid grid-cols-3 content-start gap-y-2 overflow-y-auto px-3 pb-2', cell === 'l' ? 'h-84' : 'h-70']">
       <button
+        v-ripple
         v-for="y in yearOptions"
         :key="y"
         type="button"
