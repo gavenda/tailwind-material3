@@ -39,6 +39,7 @@ import SnackbarDemo from './sections/SnackbarDemo.vue'
 import PickerDemo from './sections/PickerDemo.vue'
 import MenuDemo from './sections/MenuDemo.vue'
 import TooltipDemo from './sections/TooltipDemo.vue'
+import CanonicalLayoutsDemo from './sections/CanonicalLayoutsDemo.vue'
 import { icons } from './icons'
 import { colorMode } from './theme'
 
@@ -124,6 +125,7 @@ const cardStates = ['static', 'interactive', 'dragged', 'disabled'] as const
         <Icon :svg="isDark ? icons.lightMode : icons.darkMode" />
       </IconButton>
     </div>
+    <CanonicalLayoutsDemo />
     <section>
       <h2 class="mb-4 text-xl">Colors</h2>
       <div class="flex flex-col gap-3">
