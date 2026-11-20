@@ -62,6 +62,8 @@ const hasActions = computed(() => rich.value && !!slots.actions)
 const { show, hide, isOpen, side, justDismissed } = usePopover(anchor, tip, {
   placement: () => props.placement ?? (rich.value ? 'bottom-start' : 'top'),
   offset: 4,
+  // A persistent rich tooltip stays until Escape or a press outside, which fade it out.
+  lightDismiss: () => rich.value && props.persistent,
   onDismiss: () => (open.value = false),
 })
 
@@ -198,7 +200,7 @@ defineExpose({ show: reveal, hide: conceal })
   <div
     :id="id"
     ref="tip"
-    :popover="rich && persistent ? 'auto' : 'manual'"
+    popover="manual"
     :role="hasActions ? 'dialog' : 'tooltip'"
     :aria-labelledby="hasActions && $slots.subhead ? subheadId : undefined"
     :style="{ transformOrigin: origin }"

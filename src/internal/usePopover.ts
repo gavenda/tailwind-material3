@@ -1,8 +1,13 @@
 /**
  * Shows an element in the top layer with the Popover API and keeps it next to an anchor.
  *
- * - The floating element needs a `popover` attribute ("auto" for light dismiss and
- *   Escape, "manual" when the component closes it itself) and `popoverReset` classes.
+ * - The floating element needs `popover="manual"` and the `popoverReset` classes.
+ * - With `lightDismiss`, Escape and a press outside the popover and its anchor close it, as
+ *   `popover="auto"` would. They are handled here rather than by the browser, which hides an
+ *   auto popover on the spot and leaves no time for an exit animation: `onDismiss` is called
+ *   while it is still showing, and the component calls `hide()` once it has animated out.
+ *   Open light-dismiss popovers stack: Escape closes the newest, and a press inside one
+ *   closes only those opened after it.
  * - Placement flips to the other side when there's no room, then shifts to stay
  *   8px inside the viewport. It follows scrolling and resizing while open.
  * - `start` / `end` follow the anchor's writing direction.
@@ -12,6 +17,7 @@ import { onBeforeUnmount, ref, watch, type MaybeRefOrGetter, type Ref, toValue }
 export type Side = 'top' | 'bottom' | 'start' | 'end'
 export type Align = 'start' | 'center' | 'end'
 export type Placement = Side | `${Side}-${Exclude<Align, 'center'>}`
+export type DismissReason = 'escape' | 'outside' | 'closed'
 
 export interface PopoverOptions {
   placement?: MaybeRefOrGetter<Placement>
@@ -19,8 +25,61 @@ export interface PopoverOptions {
   offset?: MaybeRefOrGetter<number>
   /** Make the popover at least as wide as the anchor. */
   matchWidth?: MaybeRefOrGetter<boolean>
-  /** Called when the browser closes an "auto" popover (Escape or click outside). */
-  onDismiss?: () => void
+  /** Close on Escape or a press outside the popover and its anchor. */
+  lightDismiss?: MaybeRefOrGetter<boolean>
+  /**
+   * Called on a light dismiss, with the popover still showing; call `hide()` when done.
+   * `reason` says which: Escape, a press outside, or the popover closed some other way.
+   * Without it, the popover is hidden straight away.
+   */
+  onDismiss?: (reason: DismissReason) => void
+}
+
+// --- Light dismiss, shared by every open popover that asks for it.
+
+interface Layer {
+  floating: HTMLElement
+  anchor: HTMLElement | null | undefined
+  dismiss: (reason: DismissReason) => void
+}
+
+/** Open light-dismiss popovers, oldest first. */
+const layers: Layer[] = []
+
+function onEscape(e: KeyboardEvent) {
+  if (e.key !== 'Escape' || e.defaultPrevented) return
+  const top = layers.at(-1)
+  if (!top) return
+  // Cancelling the keydown also stops an enclosing modal <dialog> from closing.
+  e.preventDefault()
+  e.stopPropagation()
+  top.dismiss('escape')
+}
+
+function onPressOutside(e: PointerEvent) {
+  const target = e.target as Node | null
+  for (const layer of [...layers].reverse()) {
+    if (target && (layer.floating.contains(target) || layer.anchor?.contains(target))) break
+    layer.dismiss('outside')
+  }
+}
+
+function addLayer(layer: Layer) {
+  if (layers.length === 0) {
+    document.addEventListener('keydown', onEscape, true)
+    document.addEventListener('pointerdown', onPressOutside, true)
+  }
+  layers.push(layer)
+}
+
+function removeLayer(layer: Layer) {
+  const i = layers.indexOf(layer)
+  if (i === -1) return
+  layers.splice(i, 1)
+  if (layers.length === 0) {
+    document.removeEventListener('keydown', onEscape, true)
+    document.removeEventListener('pointerdown', onPressOutside, true)
+  }
 }
 
 const VIEWPORT_MARGIN = 8
@@ -110,19 +169,32 @@ export function usePopover(
     resize = undefined
   }
 
-  // A click on the anchor first light-dismisses an "auto" popover (on pointerdown),
-  // then its click handler would reopen it. Remember when that happened.
+  // A press on the anchor counts as inside, so its own click toggles the popover closed.
+  // Remember dismissals anyway, for a click that lands just after one.
   let dismissedAt = 0
   /** True right after a light dismiss, so a toggle click on the anchor can be ignored. */
   const justDismissed = () => performance.now() - dismissedAt < 300
 
+  let layer: Layer | null = null
+
+  function dismiss(reason: DismissReason) {
+    if (layer) removeLayer(layer)
+    layer = null
+    dismissedAt = performance.now()
+    if (options.onDismiss) options.onDismiss(reason)
+    else hide()
+  }
+
+  // Closed by something other than hide() (e.g. hidePopover() called elsewhere).
   function onToggle(e: Event) {
     const state = (e as ToggleEvent).newState
     if (state === 'closed' && isOpen.value) {
       dismissedAt = performance.now()
       isOpen.value = false
       stopTracking()
-      options.onDismiss?.()
+      if (layer) removeLayer(layer)
+      layer = null
+      options.onDismiss?.('closed')
     }
   }
 
@@ -147,6 +219,10 @@ export function usePopover(
     }
     position()
     startTracking()
+    if (toValue(options.lightDismiss)) {
+      layer = { floating: f, anchor: toValue(anchor), dismiss }
+      addLayer(layer)
+    }
   }
 
   function hide() {
@@ -154,11 +230,14 @@ export function usePopover(
     if (!isOpen.value) return
     isOpen.value = false
     stopTracking()
+    if (layer) removeLayer(layer)
+    layer = null
     if (f?.matches(':popover-open')) f.hidePopover()
   }
 
   onBeforeUnmount(() => {
     stopTracking()
+    if (layer) removeLayer(layer)
     floating.value?.removeEventListener('toggle', onToggle)
   })
 
