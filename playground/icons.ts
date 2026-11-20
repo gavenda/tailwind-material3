@@ -49,6 +49,7 @@ import mic from '@material-symbols/svg-400/outlined/mic.svg?raw'
 import attachFile from '@material-symbols/svg-400/outlined/attach_file.svg?raw'
 import send from '@material-symbols/svg-400/outlined/send.svg?raw'
 import keyboardArrowDown from '@material-symbols/svg-400/outlined/keyboard_arrow_down.svg?raw'
+import keyboardArrowUp from '@material-symbols/svg-400/outlined/keyboard_arrow_up.svg?raw'
 import explore from '@material-symbols/svg-400/outlined/explore.svg?raw'
 import exploreFill from '@material-symbols/svg-400/outlined/explore-fill.svg?raw'
 import accountCircle from '@material-symbols/svg-400/outlined/account_circle.svg?raw'
@@ -81,6 +82,21 @@ import link from '@material-symbols/svg-400/outlined/link.svg?raw'
 import lock from '@material-symbols/svg-400/outlined/lock.svg?raw'
 import language from '@material-symbols/svg-400/outlined/language.svg?raw'
 import palette from '@material-symbols/svg-400/outlined/palette.svg?raw'
+import dashboard from '@material-symbols/svg-400/outlined/dashboard.svg?raw'
+import dashboardFill from '@material-symbols/svg-400/outlined/dashboard-fill.svg?raw'
+import group from '@material-symbols/svg-400/outlined/group.svg?raw'
+import groupFill from '@material-symbols/svg-400/outlined/group-fill.svg?raw'
+import shoppingCart from '@material-symbols/svg-400/outlined/shopping_cart.svg?raw'
+import shoppingCartFill from '@material-symbols/svg-400/outlined/shopping_cart-fill.svg?raw'
+import payments from '@material-symbols/svg-400/outlined/payments.svg?raw'
+import trendingUp from '@material-symbols/svg-400/outlined/trending_up.svg?raw'
+import trendingDown from '@material-symbols/svg-400/outlined/trending_down.svg?raw'
+import analytics from '@material-symbols/svg-400/outlined/analytics.svg?raw'
+import analyticsFill from '@material-symbols/svg-400/outlined/analytics-fill.svg?raw'
+import inventory from '@material-symbols/svg-400/outlined/inventory_2.svg?raw'
+import moreHoriz from '@material-symbols/svg-400/outlined/more_horiz.svg?raw'
+import refresh from '@material-symbols/svg-400/outlined/refresh.svg?raw'
+import localShipping from '@material-symbols/svg-400/outlined/local_shipping.svg?raw'
 
 export const icons = {
   deleteIcon,
@@ -130,6 +146,7 @@ export const icons = {
   attachFile,
   send,
   keyboardArrowDown,
+  keyboardArrowUp,
   explore,
   exploreFill,
   accountCircle,
@@ -162,4 +179,19 @@ export const icons = {
   lock,
   language,
   palette,
+  dashboard,
+  dashboardFill,
+  group,
+  groupFill,
+  shoppingCart,
+  shoppingCartFill,
+  payments,
+  trendingUp,
+  trendingDown,
+  analytics,
+  analyticsFill,
+  inventory,
+  moreHoriz,
+  refresh,
+  localShipping,
 }

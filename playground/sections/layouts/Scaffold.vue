@@ -26,6 +26,7 @@ const props = defineProps<{
   fab?: { label: string; icon: string }
 }>()
 const destination = defineModel<string>({ required: true })
+const emit = defineEmits<{ fab: [] }>()
 
 const compact = computed(() => props.sizeClass === 'compact')
 const roomy = computed(() => atLeast(props.sizeClass, 'large'))
@@ -46,7 +47,7 @@ watch(roomy, (v) => (expanded.value = v))
     >
       <template #header="{ expanded: isExpanded }">
         <NavigationRailMenuButton />
-        <Fab v-if="fab" color="tertiary-container" :label="fab.label" :expanded="isExpanded" lowered>
+        <Fab v-if="fab" color="tertiary-container" :label="fab.label" :expanded="isExpanded" lowered @click="emit('fab')">
           <template #icon><Icon :svg="fab.icon" /></template>
           {{ fab.label }}
         </Fab>
@@ -61,7 +62,7 @@ watch(roomy, (v) => (expanded.value = v))
       <slot />
       <!-- Compact: the FAB floats 16dp above the navigation bar -->
       <div v-if="compact && fab" class="absolute end-4 bottom-4">
-        <Fab color="tertiary-container" size="medium" :label="fab.label">
+        <Fab color="tertiary-container" size="medium" :label="fab.label" @click="emit('fab')">
           <template #icon><Icon :svg="fab.icon" /></template>
         </Fab>
       </div>

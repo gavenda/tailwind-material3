@@ -6,6 +6,7 @@
  */
 import { computed, ref, useTemplateRef, type Component } from 'vue'
 import { Button, ButtonGroup, Dialog } from '../../src'
+import DashboardExample from './layouts/DashboardExample.vue'
 import FeedExample from './layouts/FeedExample.vue'
 import ListDetailExample from './layouts/ListDetailExample.vue'
 import SupportingPaneExample from './layouts/SupportingPaneExample.vue'
@@ -29,6 +30,12 @@ const examples: { id: string; title: string; summary: string; component: Compone
     title: 'Feed',
     summary: 'A news feed: a grid of cards that grows from one column to five.',
     component: FeedExample,
+  },
+  {
+    id: 'dashboard',
+    title: 'Admin dashboard',
+    summary: 'A shop admin: key figures, a revenue chart, top products and recent orders.',
+    component: DashboardExample,
   },
 ]
 
@@ -61,7 +68,7 @@ function show(example: (typeof examples)[number]) {
   <section>
     <h2 class="mb-1 text-xl">Canonical layouts</h2>
     <p class="mb-4 max-w-2xl text-body-medium text-on-surface-variant">
-      Full-window examples of the three M3 canonical layouts, built from these components. Each adapts across
+      Full-window examples of the three M3 canonical layouts, plus an admin dashboard, built from these components. Each adapts across
       breakpoints; pick a width in the example's header, or resize the window.
     </p>
     <div class="flex flex-wrap gap-3">
