@@ -63,11 +63,12 @@ const { show, hide, isOpen, side, justDismissed } = usePopover(anchorEl, menu, {
   placement: () => props.placement,
   offset: () => props.offset,
   matchWidth: () => props.matchWidth,
-  // Escape or a click outside closed it.
-  onDismiss: () => {
-    if (menu.value?.contains(document.activeElement)) anchorEl.value?.focus()
+  lightDismiss: true,
+  // Escape or a press outside: fade out like any other close. A press outside leaves focus
+  // where the press puts it.
+  onDismiss: (reason) => {
+    if (reason !== 'escape') restoreFocus = false
     open.value = false
-    emit('closed')
   },
 })
 
@@ -136,7 +137,7 @@ function toggle() {
   open.value = !open.value
 }
 
-// Escape is handled by the browser (popover="auto"), which then calls onDismiss.
+// Escape is handled by usePopover, which then calls onDismiss.
 function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Tab') {
     restoreFocus = false
@@ -175,7 +176,7 @@ defineExpose({ open: () => (open.value = true), close: () => (open.value = false
   <div
     :id="menuId"
     ref="menu"
-    popover="auto"
+    popover="manual"
     role="menu"
     :aria-label="label"
     :style="{

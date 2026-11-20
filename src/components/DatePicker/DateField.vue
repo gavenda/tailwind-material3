@@ -12,7 +12,7 @@
 import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
 import { popoverReset } from '../../internal/classes'
 import { iconPaths } from '../../internal/icons'
-import { animate, effects, spatial } from '../../internal/motion'
+import { animate, effects, fadeOut, spatial } from '../../internal/motion'
 import { fill, useLabels } from '../../internal/labels'
 import { usePopover } from '../../internal/usePopover'
 import IconButton from '../Button/IconButton.vue'
@@ -68,11 +68,30 @@ function commitText() {
   else if (!error.value) value.value = parseDate(text.value, props.locale)
 }
 
-const { show, hide, isOpen, justDismissed } = usePopover(anchor, popup, { placement: 'bottom-start', offset: 4 })
+const { show, hide, isOpen, justDismissed } = usePopover(anchor, popup, {
+  placement: 'bottom-start',
+  offset: 4,
+  lightDismiss: true,
+  onDismiss: () => close(),
+})
+
+// Bumped on every open/close, so a close that finishes animating after a reopen gives up.
+let generation = 0
+
+async function close() {
+  if (!isOpen.value) return
+  const mine = ++generation
+  await fadeOut(popup.value)
+  if (mine !== generation) return
+  popup.value?.getAnimations().forEach((a) => a.cancel())
+  hide()
+}
 
 async function toggle() {
   if (justDismissed()) return
-  if (isOpen.value) return hide()
+  if (isOpen.value) return close()
+  ++generation
+  popup.value?.getAnimations().forEach((a) => a.cancel())
   show()
   await nextTick()
   animate(popup.value, [{ transform: 'translateY(-8px)' }, { transform: 'none' }], spatial(popup.value, 'fast'))
@@ -82,7 +101,7 @@ async function toggle() {
 
 function pick(d: Date) {
   value.value = d
-  hide()
+  close()
   ;(anchor.value?.querySelector('input') as HTMLInputElement | null)?.focus()
 }
 </script>
@@ -121,7 +140,7 @@ function pick(d: Date) {
   <div
     :id="popupId"
     ref="popup"
-    popover="auto"
+    popover="manual"
     role="dialog"
     :aria-label="fieldLabel"
     :class="[popoverReset, 'z-50 w-90 max-w-[calc(100vw-1rem)] rounded-2xl bg-surface-container-high px-0 pt-0 pb-3 shadow-elevation-3']"
