@@ -10,6 +10,7 @@
  *   element as the `anchor` prop.
  * - Content: MenuItems, optionally in MenuGroups (grouped layout: separate surfaces
  *   2dp apart). Without groups, the items share one surface.
+ * - `maxHeight` caps the height; the content then scrolls. `maxWidth` raises the default 280dp cap.
  * - Arrow keys, Home and End move focus between items. Focus returns to the anchor on close.
  */
 import { computed, nextTick, onMounted, provide, reactive, ref, useId, useTemplateRef, watch } from 'vue'
@@ -31,6 +32,10 @@ const props = withDefaults(
     matchWidth?: boolean
     /** Accessible name for the menu. */
     label?: string
+    /** Cap the menu's height (px or any CSS length); taller content scrolls. */
+    maxHeight?: number | string
+    /** Raise the 280dp default width cap (px or any CSS length), for longer items. */
+    maxWidth?: number | string
   }>(),
   {
     variant: 'standard',
@@ -39,6 +44,8 @@ const props = withDefaults(
     offset: 4,
     matchWidth: false,
     label: undefined,
+    maxHeight: undefined,
+    maxWidth: undefined,
   },
 )
 
@@ -171,7 +178,11 @@ defineExpose({ open: () => (open.value = true), close: () => (open.value = false
     popover="auto"
     role="menu"
     :aria-label="label"
-    :style="{ transformOrigin: origin }"
+    :style="{
+      transformOrigin: origin,
+      ...(maxWidth !== undefined && { maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth }),
+      ...(maxHeight !== undefined && { maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight, overflowY: 'auto' }),
+    }"
     :class="[
       popoverReset,
       // Display only while open, so the browser's hidden style for closed popovers still applies.
