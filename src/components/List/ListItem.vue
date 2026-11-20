@@ -79,12 +79,12 @@ const muted = computed(() => (props.selected ? 'text-on-secondary-container' : '
   <component
     :is="as"
     v-ripple="isInteractive"
-    v-bind="$attrs"
     :type="isNativeButton ? 'button' : undefined"
     :disabled="isNativeButton ? disabled : undefined"
     :aria-disabled="disabled || undefined"
     :aria-current="selected && as === 'a' ? 'page' : undefined"
     :tabindex="disabled && !isNativeButton ? -1 : undefined"
+    v-bind="$attrs"
     :class="[
       'relative flex w-full gap-3 py-2.5 ps-4 pe-4 text-start font-plain no-underline shape-morph',
       classes,
